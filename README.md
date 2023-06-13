@@ -5,7 +5,7 @@
 ├── cmd ------------------------------------> Entry point
 │   └── main.go
 ├── internal
-│   ├── app --------------------------------> Initialization
+│   ├── app --------------------------------> Initialization 
 │   │   └── app.go
 │   ├── domain -----------------------------> Encapsulate Business Rules (Entities Layer)
 │   │   ├── booking.go
