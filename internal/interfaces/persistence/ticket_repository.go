@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type TicketRepo struct {
-	db *gorm.DB
+type TicketRepository struct {
 }
 
-func (a *TicketRepo) New(db *gorm.DB) *TicketRepo {
-	return &TicketRepo{db: db}
+func (a *TicketRepository) New() *TicketRepository {
+	return &TicketRepository{}
 }
 
-func (a *TicketRepo) Save(input *domain.Ticket) (*domain.Ticket, error) {
+func (a *TicketRepository) Create(input *domain.Ticket) (*domain.Ticket, error) {
 	var ticket domain.Ticket
-	db := a.db.Model(&ticket)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&ticket)
 
 	checkTicketExist := db.Debug().First(&ticket, "ID = ?", input.ID)
 
@@ -30,7 +30,6 @@ func (a *TicketRepo) Save(input *domain.Ticket) (*domain.Ticket, error) {
 	ticket.Passenger = input.Passenger
 	ticket.Payment = input.Payment
 	ticket.User = input.User
-	ticket.StatusPay = input.StatusPay
 	ticket.Refund = input.Refund
 
 	addNewTicket := db.Debug().Create(&ticket).Commit()
@@ -42,54 +41,56 @@ func (a *TicketRepo) Save(input *domain.Ticket) (*domain.Ticket, error) {
 	return &ticket, nil
 }
 
-func (a *TicketRepo) Update(input *domain.Ticket) (*domain.Ticket, error) {
-	var city domain.Ticket
-	db := a.db.Model(&city)
+func (a *TicketRepository) Update(input *domain.Ticket) (*domain.Ticket, error) {
+	var ticket domain.Ticket
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&ticket)
 
-	checkTicketExist := db.Debug().Where(&city, "ID = ?", input.ID)
+	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", input.ID)
 
 	if checkTicketExist.RowsAffected <= 0 {
-		return &city, errors.New(strconv.Itoa(http.StatusNotFound))
+		return &ticket, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
 
 	tx := checkTicketExist.Update("ID", input.ID).Update("Flight", input.Flight).Update("Passenger", input.Passenger)
-	tx = tx.Update("Payment", input.Payment).Update("User", input.User).Update("StatusPay", input.StatusPay)
-	tx = tx.Update("Refund", input.Refund)
+	tx = tx.Update("Payment", input.Payment).Update("User", input.User).Update("Refund", input.Refund)
 
 	if err := tx.Error; err != nil {
 		return nil, err
 	} else {
 		updateTicket := tx.Commit()
 		if updateTicket.RowsAffected < 1 {
-			return &city, errors.New(strconv.Itoa(http.StatusForbidden))
+			return &ticket, errors.New(strconv.Itoa(http.StatusForbidden))
 		}
 	}
 
-	return &city, nil
+	return &ticket, nil
 }
 
-func (a *TicketRepo) Get(id int) (*domain.Ticket, error) {
-	var city domain.Ticket
-	db := a.db.Model(&city)
+func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
+	var ticket domain.Ticket
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&ticket)
 
-	checkTicketExist := db.Debug().Where(&city, "ID = ?", id)
+	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", id)
 
 	if checkTicketExist.RowsAffected <= 0 {
-		return &city, errors.New(strconv.Itoa(http.StatusNotFound))
+		return &ticket, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
 
-	tx := checkTicketExist.Find(&city)
+	tx := checkTicketExist.Find(&ticket)
 
 	if err := tx.Error; err != nil {
 		return nil, err
 	}
 
-	return &city, nil
+	return &ticket, nil
 }
 
-func (a *TicketRepo) GetAll() (*[]domain.Ticket, error) {
+func (a *TicketRepository) GetAll() (*[]domain.Ticket, error) {
 	var tickets []domain.Ticket
-	db := a.db.Model(&tickets)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&tickets)
 
 	checkTicketExist := db.Debug().Find(&tickets)
 
@@ -106,13 +107,14 @@ func (a *TicketRepo) GetAll() (*[]domain.Ticket, error) {
 	return &tickets, nil
 }
 
-func (a *TicketRepo) Delete(id int) error {
-	city, err := a.Get(id)
+func (a *TicketRepository) Delete(id int) error {
+	ticket, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&city)
-	deleted := db.Debug().Delete(city).Commit()
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&ticket)
+	deleted := db.Debug().Delete(ticket).Commit()
 	if deleted.Error != nil {
 		return deleted.Error
 	}

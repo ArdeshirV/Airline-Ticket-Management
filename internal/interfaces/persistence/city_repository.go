@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type CityRepo struct {
-	db *gorm.DB
+type CityRepository struct {
 }
 
-func (a *CityRepo) New(db *gorm.DB) *CityRepo {
-	return &CityRepo{db: db}
+func (a *CityRepository) New() *CityRepository {
+	return &CityRepository{}
 }
 
-func (a *CityRepo) Save(input *domain.City) (*domain.City, error) {
+func (a *CityRepository) Create(input *domain.City) (*domain.City, error) {
 	var city domain.City
-	db := a.db.Model(&city)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&city)
 
 	checkCityExist := db.Debug().First(&city, "ID = ?", input.ID)
 
@@ -37,9 +37,10 @@ func (a *CityRepo) Save(input *domain.City) (*domain.City, error) {
 	return &city, nil
 }
 
-func (a *CityRepo) Update(input *domain.City) (*domain.City, error) {
+func (a *CityRepository) Update(input *domain.City) (*domain.City, error) {
 	var city domain.City
-	db := a.db.Model(&city)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&city)
 
 	checkCityExist := db.Debug().Where(&city, "ID = ?", input.ID)
 
@@ -61,9 +62,10 @@ func (a *CityRepo) Update(input *domain.City) (*domain.City, error) {
 	return &city, nil
 }
 
-func (a *CityRepo) Get(id int) (*domain.City, error) {
+func (a *CityRepository) Get(id int) (*domain.City, error) {
 	var city domain.City
-	db := a.db.Model(&city)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&city)
 
 	checkCityExist := db.Debug().Where(&city, "ID = ?", id)
 
@@ -80,9 +82,10 @@ func (a *CityRepo) Get(id int) (*domain.City, error) {
 	return &city, nil
 }
 
-func (a *CityRepo) GetAll() (*[]domain.City, error) {
+func (a *CityRepository) GetAll() (*[]domain.City, error) {
 	var cities []domain.City
-	db := a.db.Model(&cities)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&cities)
 
 	checkCityExist := db.Debug().Find(&cities)
 
@@ -99,12 +102,13 @@ func (a *CityRepo) GetAll() (*[]domain.City, error) {
 	return &cities, nil
 }
 
-func (a *CityRepo) Delete(id int) error {
+func (a *CityRepository) Delete(id int) error {
 	city, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&city)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&city)
 	deleted := db.Debug().Delete(city).Commit()
 	if deleted.Error != nil {
 		return deleted.Error

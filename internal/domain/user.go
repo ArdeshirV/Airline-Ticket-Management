@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID         int
@@ -9,6 +11,7 @@ type User struct {
 	Email      string
 	Phone      string
 	CreatedAt  time.Time
+	RoleID     uint
 	Role       Role
-	Passengers []*Passenger
+	Passengers []Passenger
 }

@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type PassengerRepo struct {
-	db *gorm.DB
+type PassengerRepository struct {
 }
 
-func (a *PassengerRepo) New(db *gorm.DB) *PassengerRepo {
-	return &PassengerRepo{db: db}
+func (a *PassengerRepository) New() *PassengerRepository {
+	return &PassengerRepository{}
 }
 
-func (a *PassengerRepo) Save(input *domain.Passenger) (*domain.Passenger, error) {
+func (a *PassengerRepository) Create(input *domain.Passenger) (*domain.Passenger, error) {
 	var passenger domain.Passenger
-	db := a.db.Model(&passenger)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&passenger)
 
 	checkPassengerExist := db.Debug().First(&passenger, "ID = ?", input.ID)
 
@@ -32,7 +32,6 @@ func (a *PassengerRepo) Save(input *domain.Passenger) (*domain.Passenger, error)
 	passenger.Email = input.Email
 	passenger.Gender = input.Gender
 	passenger.Phone = input.Phone
-	passenger.Age = input.Age
 	passenger.Address = input.Address
 	passenger.Tickets = input.Tickets
 
@@ -45,9 +44,10 @@ func (a *PassengerRepo) Save(input *domain.Passenger) (*domain.Passenger, error)
 	return &passenger, nil
 }
 
-func (a *PassengerRepo) Update(input *domain.Passenger) (*domain.Passenger, error) {
+func (a *PassengerRepository) Update(input *domain.Passenger) (*domain.Passenger, error) {
 	var passenger domain.Passenger
-	db := a.db.Model(&passenger)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&passenger)
 
 	checkPassengerExist := db.Debug().Where(&passenger, "ID = ?", input.ID)
 
@@ -57,7 +57,7 @@ func (a *PassengerRepo) Update(input *domain.Passenger) (*domain.Passenger, erro
 
 	tx := checkPassengerExist.Update("ID", input.ID).Update("FirstName", input.FirstName).Update("LastName", input.LastName)
 	tx = tx.Update("NationalCode", input.NationalCode).Update("Email", input.Email).Update("Gender", input.Gender)
-	tx = tx.Update("Phone", input.Phone).Update("Age", input.Age).Update("Address", input.Address).Update("Tickets", input.Tickets)
+	tx = tx.Update("Phone", input.Phone).Update("Address", input.Address).Update("Tickets", input.Tickets)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -71,9 +71,10 @@ func (a *PassengerRepo) Update(input *domain.Passenger) (*domain.Passenger, erro
 	return &passenger, nil
 }
 
-func (a *PassengerRepo) Get(id int) (*domain.Passenger, error) {
+func (a *PassengerRepository) Get(id int) (*domain.Passenger, error) {
 	var passenger domain.Passenger
-	db := a.db.Model(&passenger)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&passenger)
 
 	checkPassengerExist := db.Debug().Where(&passenger, "ID = ?", id)
 
@@ -90,9 +91,10 @@ func (a *PassengerRepo) Get(id int) (*domain.Passenger, error) {
 	return &passenger, nil
 }
 
-func (a *PassengerRepo) GetAll() (*[]domain.Passenger, error) {
+func (a *PassengerRepository) GetAll() (*[]domain.Passenger, error) {
 	var passengers []domain.Passenger
-	db := a.db.Model(&passengers)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&passengers)
 
 	checkPassengerExist := db.Debug().Find(&passengers)
 
@@ -109,12 +111,13 @@ func (a *PassengerRepo) GetAll() (*[]domain.Passenger, error) {
 	return &passengers, nil
 }
 
-func (a *PassengerRepo) Delete(id int) error {
+func (a *PassengerRepository) Delete(id int) error {
 	passenger, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&passenger)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&passenger)
 	deleted := db.Debug().Delete(passenger).Commit()
 	if deleted.Error != nil {
 		return deleted.Error

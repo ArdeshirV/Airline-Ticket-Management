@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type FlightRepo struct {
-	db *gorm.DB
+type FlightRepository struct {
 }
 
-func (a *FlightRepo) New(db *gorm.DB) *FlightRepo {
-	return &FlightRepo{db: db}
+func (a *FlightRepository) New() *FlightRepository {
+	return &FlightRepository{}
 }
 
-func (a *FlightRepo) Save(input *domain.Flight) (*domain.Flight, error) {
+func (a *FlightRepository) Create(input *domain.Flight) (*domain.Flight, error) {
 	var flight domain.Flight
-	db := a.db.Model(&flight)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&flight)
 
 	checkFlightExist := db.Debug().First(&flight, "ID = ?", input.ID)
 
@@ -31,7 +31,6 @@ func (a *FlightRepo) Save(input *domain.Flight) (*domain.Flight, error) {
 	flight.Destination = input.Destination
 	flight.DepartureTime = input.DepartureTime
 	flight.ArrivalTime = input.ArrivalTime
-	flight.Airlines = input.Airlines
 	flight.FlightClass = input.FlightClass
 	flight.Price = input.Price
 	flight.Capacity = input.Capacity
@@ -46,9 +45,10 @@ func (a *FlightRepo) Save(input *domain.Flight) (*domain.Flight, error) {
 	return &flight, nil
 }
 
-func (a *FlightRepo) Update(input *domain.Flight) (*domain.Flight, error) {
+func (a *FlightRepository) Update(input *domain.Flight) (*domain.Flight, error) {
 	var flight domain.Flight
-	db := a.db.Model(&flight)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&flight)
 
 	checkCityExist := db.Debug().Where(&flight, "ID = ?", input.ID)
 
@@ -58,7 +58,7 @@ func (a *FlightRepo) Update(input *domain.Flight) (*domain.Flight, error) {
 
 	tx := checkCityExist.Update("ID", input.ID).Update("FlightNo", input.FlightNo).Update("Departure", input.Departure)
 	tx = tx.Update("Destination", input.Destination).Update("DepartureTime", input.DepartureTime).Update("ArrivalTime", input.ArrivalTime)
-	tx = tx.Update("Airlines", input.Airlines).Update("FlightClass", input.FlightClass).Update("Price", input.Price)
+	tx = tx.Update("FlightClass", input.FlightClass).Update("Price", input.Price)
 	tx = tx.Update("Capacity", input.Capacity).Update("CancelCondition", input.CancelCondition)
 
 	if err := tx.Error; err != nil {
@@ -73,9 +73,10 @@ func (a *FlightRepo) Update(input *domain.Flight) (*domain.Flight, error) {
 	return &flight, nil
 }
 
-func (a *FlightRepo) Get(id int) (*domain.Flight, error) {
+func (a *FlightRepository) Get(id int) (*domain.Flight, error) {
 	var flight domain.Flight
-	db := a.db.Model(&flight)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&flight)
 
 	checkFlightExist := db.Debug().Where(&flight, "ID = ?", id)
 
@@ -92,9 +93,10 @@ func (a *FlightRepo) Get(id int) (*domain.Flight, error) {
 	return &flight, nil
 }
 
-func (a *FlightRepo) GetAll() (*[]domain.Flight, error) {
+func (a *FlightRepository) GetAll() (*[]domain.Flight, error) {
 	var flights []domain.Flight
-	db := a.db.Model(&flights)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&flights)
 
 	checkFlightExist := db.Debug().Find(&flights)
 
@@ -111,12 +113,14 @@ func (a *FlightRepo) GetAll() (*[]domain.Flight, error) {
 	return &flights, nil
 }
 
-func (a *FlightRepo) Delete(id int) error {
+func (a *FlightRepository) Delete(id int) error {
 	flight, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&flight)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&flight)
+
 	deleted := db.Debug().Delete(flight).Commit()
 	if deleted.Error != nil {
 		return deleted.Error

@@ -1,9 +1,13 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Payment struct {
-	ID            int
+	gorm.Model
 	PayAmount     int
 	PayTime       time.Time
 	PaymentSerial string

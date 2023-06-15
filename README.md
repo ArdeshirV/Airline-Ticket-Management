@@ -5,7 +5,7 @@
 ├── cmd ------------------------------------> Entry point
 │   └── main.go
 ├── internal
-│   ├── app --------------------------------> Initialization
+│   ├── app --------------------------------> Initialization 
 │   │   └── app.go
 │   ├── domain -----------------------------> Encapsulate Business Rules (Entities Layer)
 │   │   ├── booking.go
@@ -34,7 +34,10 @@
 ├── pkg ------------------------------------> External Frameworks and Drivers (Port|Infra)
 │   ├── config -----------------------------> Configurations
 │   │   └── config.go
+│   ├── database----------------------------> Databse Layer that contains GORM
+│   │   └── db.go
 │   └── logger -----------------------------> Logger
 │       └── logger.go
 └── README.md ------------------------------> Documentations
 ```
+<p style="text-align: center; width: 100%; ">Copyright&copy; 2023 <a href="https://github.com/the-go-dragons">The Go Dragons Team</a>, Licensed under MIT</p>

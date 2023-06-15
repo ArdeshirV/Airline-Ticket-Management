@@ -1,14 +1,21 @@
 package domain
 
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
 type Passenger struct {
-	ID           int
+	gorm.Model
 	FirstName    string
 	LastName     string
 	NationalCode string
 	Email        string
 	Gender       Gender
 	Phone        string
-	Age          uint
+	BirthDate    time.Time
 	Address      string
-	Tickets      []*Ticket
+	UserID       uint
+	Tickets      []Ticket
 }

@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type PaymentRepo struct {
-	db *gorm.DB
+type PaymentRepository struct {
 }
 
-func (a *PaymentRepo) New(db *gorm.DB) *PaymentRepo {
-	return &PaymentRepo{db: db}
+func (a *PaymentRepository) New() *PaymentRepository {
+	return &PaymentRepository{}
 }
 
-func (a *PaymentRepo) Save(input *domain.Payment) (*domain.Payment, error) {
+func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, error) {
 	var payment domain.Payment
-	db := a.db.Model(&payment)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&payment)
 
 	checkPaymentExist := db.Debug().First(&payment, "ID = ?", input.ID)
 
@@ -39,9 +39,10 @@ func (a *PaymentRepo) Save(input *domain.Payment) (*domain.Payment, error) {
 	return &payment, nil
 }
 
-func (a *PaymentRepo) Update(input *domain.Payment) (*domain.Payment, error) {
+func (a *PaymentRepository) Update(input *domain.Payment) (*domain.Payment, error) {
 	var payment domain.Payment
-	db := a.db.Model(&payment)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&payment)
 
 	checkPaymentExist := db.Debug().Where(&payment, "ID = ?", input.ID)
 
@@ -63,9 +64,10 @@ func (a *PaymentRepo) Update(input *domain.Payment) (*domain.Payment, error) {
 	return &payment, nil
 }
 
-func (a *PaymentRepo) Get(id int) (*domain.Payment, error) {
+func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
 	var payment domain.Payment
-	db := a.db.Model(&payment)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&payment)
 
 	checkPaymentExist := db.Debug().Where(&payment, "ID = ?", id)
 
@@ -82,9 +84,10 @@ func (a *PaymentRepo) Get(id int) (*domain.Payment, error) {
 	return &payment, nil
 }
 
-func (a *PaymentRepo) GetAll() (*[]domain.Payment, error) {
+func (a *PaymentRepository) GetAll() (*[]domain.Payment, error) {
 	var payments []domain.Payment
-	db := a.db.Model(&payments)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&payments)
 
 	checkPaymentExist := db.Debug().Find(&payments)
 
@@ -101,12 +104,13 @@ func (a *PaymentRepo) GetAll() (*[]domain.Payment, error) {
 	return &payments, nil
 }
 
-func (a *PaymentRepo) Delete(id int) error {
+func (a *PaymentRepository) Delete(id int) error {
 	payment, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&payment)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&payment)
 	deleted := db.Debug().Delete(payment).Commit()
 	if deleted.Error != nil {
 		return deleted.Error
