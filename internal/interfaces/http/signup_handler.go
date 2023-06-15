@@ -1,0 +1,79 @@
+package http
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/usecase"
+	"golang.org/x/crypto/bcrypt"
+)
+
+type SignupRequest struct {
+	Username string
+	Email    string
+	Password string
+	Phone    string
+}
+
+type MassageResponse struct {
+	Message string `json:"message"`
+}
+
+type SignupHandler struct {
+	usecase *usecase.UserUsecase
+}
+
+func NewUserHandler(usecase *usecase.UserUsecase) *SignupHandler {
+	return &SignupHandler{
+		usecase: usecase,
+	}
+}
+
+func (sh *SignupHandler) Signup(c echo.Context) error {
+	var request SignupRequest
+
+	// Check the body data
+	err := c.Bind(&request)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "Invalid body request"})
+
+	}
+	if request.Username == "" || request.Email == "" || request.Password == "" || request.Phone == "" {
+		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "Missing required fields"})
+	}
+
+	// Check for dupplication
+	_, err = sh.usecase.GetUserByEmail(request.Email)
+	if err == nil {
+		return c.JSON(http.StatusConflict, MassageResponse{Message: "User already exists with the given email or username"})
+	}
+	_, err = sh.usecase.GetUserByUsername(request.Username)
+	if err == nil {
+		return c.JSON(http.StatusConflict, MassageResponse{Message: "User already exists with the given email or username"})
+	}
+
+	// Hash the password
+	encryptedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(request.Password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "Cant hash password")
+	}
+	request.Password = string(encryptedPassword)
+
+	// Create the user
+	user := domain.User{
+		Email:    request.Email,
+		Username: request.Username,
+		Password: request.Password,
+		Phone:    request.Phone,
+	}
+	_, err = sh.usecase.CreateUser(&user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, MassageResponse{Message: "Cant create user"})
+	}
+
+	return c.JSON(http.StatusOK, MassageResponse{Message: "Created"})
+}
