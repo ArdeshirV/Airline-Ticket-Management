@@ -13,5 +13,5 @@ type Flight struct {
 	FlightClass     FlightClass
 	Price           float64
 	Capacity        int
-	cancelCondition string
+	CancelCondition string
 }
