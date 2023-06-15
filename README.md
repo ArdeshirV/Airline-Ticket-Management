@@ -40,3 +40,4 @@
 │       └── logger.go
 └── README.md ------------------------------> Documentations
 ```
+<p style="text-align: center; width: 100%; ">Copyright&copy; 2023 <a href="https://github.com/the-go-dragons">The Go Dragons Team</a>, Licensed under MIT</p>
