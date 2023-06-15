@@ -34,6 +34,8 @@
 ├── pkg ------------------------------------> External Frameworks and Drivers (Port|Infra)
 │   ├── config -----------------------------> Configurations
 │   │   └── config.go
+│   ├── database----------------------------> Databse Layer that contains GORM
+│   │   └── db.go
 │   └── logger -----------------------------> Logger
 │       └── logger.go
 └── README.md ------------------------------> Documentations
