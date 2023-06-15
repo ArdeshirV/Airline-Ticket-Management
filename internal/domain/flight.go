@@ -1,17 +1,24 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Flight struct {
-	ID              int
+	gorm.Model
 	FlightNo        string
+	DepartureID     uint
 	Departure       Airport
+	DestinationID   uint
 	Destination     Airport
 	DepartureTime   time.Time
 	ArrivalTime     time.Time
-	Airlines        Airline
+	AirlineID       uint
+	Airline         Airline
 	FlightClass     FlightClass
-	Price           float64
+	Price           int
 	Capacity        int
-	cancelCondition string
+	CancelCondition string
 }
