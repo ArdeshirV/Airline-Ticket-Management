@@ -1,8 +1,11 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserUsecase struct {
@@ -16,6 +19,16 @@ func NewUserUsecase(repository *persistence.UserRepository) *UserUsecase {
 }
 
 func (ur *UserUsecase) CreateUser(user *domain.User) (*domain.User, error) {
+	// Hash the password
+	encryptedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(user.Password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		return nil, errors.New("Cant hash password")
+	}
+	user.Password = string(encryptedPassword)
+
 	return ur.repository.Create(user)
 }
 

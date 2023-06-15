@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/usecase"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type SignupRequest struct {
@@ -52,16 +51,6 @@ func (sh *SignupHandler) Signup(c echo.Context) error {
 	if err == nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "User already exists with the given email or username"})
 	}
-
-	// Hash the password
-	encryptedPassword, err := bcrypt.GenerateFromPassword(
-		[]byte(request.Password),
-		bcrypt.DefaultCost,
-	)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, "Cant hash password")
-	}
-	request.Password = string(encryptedPassword)
 
 	// Create the user
 	user := domain.User{
