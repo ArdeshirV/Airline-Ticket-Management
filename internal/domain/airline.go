@@ -1,7 +1,11 @@
 package domain
 
+import (
+	"gorm.io/gorm"
+)
+
 type Airline struct {
-	ID   int
-	Name string
-	Logo string
+	gorm.Model
+	Name string `gorm:"not null" json:"name"`
+	Logo string `json:"logo"`
 }

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   postgres:
-    image: postgres:13.11
+    image: postgres:15.3-alpine
     hostname: ${DATABASE_HOST}
     command: -p ${DATABASE_PORT} # Change the default port
     environment:
