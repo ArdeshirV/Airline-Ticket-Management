@@ -1,14 +1,18 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	_ "gorm.io/gorm"
+)
 
 type User struct {
-	ID         int
-	Username   string
-	Password   string
-	Email      string
-	Phone      string
-	CreatedAt  time.Time
-	Role       Role
-	Passengers []*Passenger
+	ID        int `gorm:"primarykey"`
+	Username  string
+	Password  string
+	Email     string
+	Phone     string
+	CreatedAt time.Time
+	// Role       Role
+	// Passengers []*Passenger
 }
