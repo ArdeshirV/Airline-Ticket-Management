@@ -1,7 +1,9 @@
 package domain
 
+import "gorm.io/gorm"
+
 type Role struct {
-	ID          int
+	gorm.Model
 	Name        string
 	Description string
 }
