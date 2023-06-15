@@ -1,6 +1,8 @@
 package domain
 
+import "gorm.io/gorm"
+
 type City struct {
-	ID   int
+	gorm.Model
 	Name string
 }

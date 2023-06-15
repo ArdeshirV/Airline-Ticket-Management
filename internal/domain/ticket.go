@@ -1,11 +1,17 @@
 package domain
 
+import "gorm.io/gorm"
+
 type Ticket struct {
-	ID        int
-	Flight    *Flight
-	Passenger *Passenger
-	Payment   *Payment
-	User      User
-	StatusPay string
-	Refund    bool
+	gorm.Model
+	FlightID      uint
+	Flight        Flight
+	PassengerID   uint
+	Passenger     Passenger
+	PaymentID     uint
+	Payment       Payment
+	UserID        uint
+	User          User
+	PaymentStatus string
+	Refund        bool
 }
