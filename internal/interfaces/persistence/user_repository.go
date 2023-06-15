@@ -2,76 +2,79 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type UserRepo struct {
-	db *gorm.DB
+type UserRepository struct{}
+
+func (ur *UserRepository) New() *UserRepository {
+	return &UserRepository{}
 }
 
-func (a *UserRepo) New(db *gorm.DB) *UserRepo {
-	return &UserRepo{db: db}
-}
-
-func (a *UserRepo) Save(input *domain.User) (*domain.User, error) {
-	var user domain.User
-	db := a.db.Model(&user)
-
-	checkUserExist := db.Debug().First(&user, "ID = ?", input.ID)
-
-	if checkUserExist.RowsAffected > 0 {
-		return &user, errors.New(strconv.Itoa(http.StatusConflict))
+func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&user)
+	result := db.Create(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	} else {
+		result.Commit()
 	}
-
-	user.Username = input.Username
-	user.Password = input.Password
-	user.Email = input.Email
-	user.Phone = input.Phone
-	user.CreatedAt = input.CreatedAt
-	user.Role = input.Role
-	user.Passengers = input.Passengers
-
-	addNewUser := db.Debug().Create(&user).Commit()
-
-	if addNewUser.RowsAffected < 1 {
-		return &user, errors.New(strconv.Itoa(http.StatusForbidden))
-	}
-
-	return &user, nil
+	return user, nil
 }
 
-func (a *UserRepo) Update(input *domain.User) (*domain.User, error) {
-	var user domain.User
-	db := a.db.Model(&user)
+func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
+	user := new(domain.User)
+	db, _ := database.GetDatabaseConnection()
+	db.Where("email = ?", email).First(&user)
+	if user.ID == 0 {
+		return nil, errors.New("User not found")
+	}
+	return user, nil
+}
 
-	checkUserExist := db.Debug().Where(&user, "ID = ?", input.ID)
+func (ur *UserRepository) GeByUsername(username string) (*domain.User, error) {
+	user := new(domain.User)
+	db, _ := database.GetDatabaseConnection()
+	db.Where("username = ?", username).First(&user)
+	if user.ID == 0 {
+		return nil, errors.New("User not found")
+	}
+	return user, nil
+}
 
+func (ur *UserRepository) Update(user *domain.User) (*domain.User, error) {
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&user)
+
+	checkUserExist := db.Debug().Where(&user, "ID = ?", user.ID)
 	if checkUserExist.RowsAffected <= 0 {
-		return &user, errors.New(strconv.Itoa(http.StatusNotFound))
+		return user, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
 
-	tx := checkUserExist.Update("ID", input.ID).Update("Username", input.Username).Update("Password", input.Password)
-	tx = tx.Update("Email", input.Email).Update("Phone", input.Phone).Update("CreatedAt", input.CreatedAt)
-	tx = tx.Update("Role", input.Role).Update("Passengers", input.Passengers)
+	tx := checkUserExist.Update("ID", user.ID).Update("Username", user.Username).Update("Password", user.Password)
+	tx = tx.Update("Email", user.Email).Update("Phone", user.Phone).Update("CreatedAt", user.CreatedAt)
+	tx = tx.Update("Role", user.Role).Update("Passengers", user.Passengers)
 
 	if err := tx.Error; err != nil {
 		return nil, err
 	} else {
 		updatedUser := tx.Commit()
 		if updatedUser.RowsAffected < 1 {
-			return &user, errors.New(strconv.Itoa(http.StatusForbidden))
+			return user, errors.New(strconv.Itoa(http.StatusForbidden))
 		}
 	}
 
-	return &user, nil
+	return user, nil
 }
 
-func (a *UserRepo) Get(id int) (*domain.User, error) {
+func (ur *UserRepository) Get(id int) (*domain.User, error) {
 	var user domain.User
-	db := a.db.Model(&user)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&user)
 
 	checkUserExist := db.Debug().Where(&user, "ID = ?", id)
 
@@ -88,9 +91,10 @@ func (a *UserRepo) Get(id int) (*domain.User, error) {
 	return &user, nil
 }
 
-func (a *UserRepo) GetAll() (*[]domain.User, error) {
+func (ur *UserRepository) GetAll() (*[]domain.User, error) {
 	var users []domain.User
-	db := a.db.Model(&users)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&users)
 
 	checkUserExist := db.Debug().Find(&users)
 
@@ -107,12 +111,13 @@ func (a *UserRepo) GetAll() (*[]domain.User, error) {
 	return &users, nil
 }
 
-func (a *UserRepo) Delete(id int) error {
-	user, err := a.Get(id)
+func (ur *UserRepository) Delete(id int) error {
+	user, err := ur.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&user)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&user)
 	deleted := db.Debug().Delete(user).Commit()
 	if deleted.Error != nil {
 		return deleted.Error

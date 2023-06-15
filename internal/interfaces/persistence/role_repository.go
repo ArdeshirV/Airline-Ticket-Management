@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type RoleRepo struct {
-	db *gorm.DB
+type RoleRepository struct {
 }
 
-func (a *RoleRepo) New(db *gorm.DB) *RoleRepo {
-	return &RoleRepo{db: db}
+func (a *RoleRepository) New() *RoleRepository {
+	return &RoleRepository{}
 }
 
-func (a *RoleRepo) Save(input *domain.Role) (*domain.Role, error) {
+func (a *RoleRepository) Create(input *domain.Role) (*domain.Role, error) {
 	var role domain.Role
-	db := a.db.Model(&role)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&role)
 
 	checkRoleExist := db.Debug().First(&role, "ID = ?", input.ID)
 
@@ -38,9 +38,10 @@ func (a *RoleRepo) Save(input *domain.Role) (*domain.Role, error) {
 	return &role, nil
 }
 
-func (a *RoleRepo) Update(input *domain.Role) (*domain.Role, error) {
+func (a *RoleRepository) Update(input *domain.Role) (*domain.Role, error) {
 	var role domain.Role
-	db := a.db.Model(&role)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&role)
 
 	checkRoleExist := db.Debug().Where(&role, "ID = ?", input.ID)
 
@@ -62,9 +63,10 @@ func (a *RoleRepo) Update(input *domain.Role) (*domain.Role, error) {
 	return &role, nil
 }
 
-func (a *RoleRepo) Get(id int) (*domain.Role, error) {
+func (a *RoleRepository) Get(id int) (*domain.Role, error) {
 	var role domain.Role
-	db := a.db.Model(&role)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&role)
 
 	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
 
@@ -81,9 +83,10 @@ func (a *RoleRepo) Get(id int) (*domain.Role, error) {
 	return &role, nil
 }
 
-func (a *RoleRepo) GetAll() (*[]domain.Role, error) {
+func (a *RoleRepository) GetAll() (*[]domain.Role, error) {
 	var roles []domain.Role
-	db := a.db.Model(&roles)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&roles)
 
 	checkRoleExist := db.Debug().Find(&roles)
 
@@ -100,12 +103,13 @@ func (a *RoleRepo) GetAll() (*[]domain.Role, error) {
 	return &roles, nil
 }
 
-func (a *RoleRepo) Delete(id int) error {
+func (a *RoleRepository) Delete(id int) error {
 	role, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&role)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&role)
 	deleted := db.Debug().Delete(role).Commit()
 	if deleted.Error != nil {
 		return deleted.Error

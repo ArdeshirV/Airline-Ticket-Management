@@ -2,23 +2,23 @@ package persistance
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"internal/internal/domain"
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
 )
 
-type AirportRepo struct {
-	db *gorm.DB
+type AirportRepository struct {
 }
 
-func (a *AirportRepo) New(db *gorm.DB) *AirportRepo {
-	return &AirportRepo{db: db}
+func (a *AirportRepository) New() *AirportRepository {
+	return &AirportRepository{}
 }
 
-func (a *AirportRepo) Save(input *domain.Airport) (*domain.Airport, error) {
+func (a *AirportRepository) Create(input *domain.Airport) (*domain.Airport, error) {
 	var airport domain.Airport
-	db := a.db.Model(&airport)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&airport)
 
 	checkAirportExist := db.Debug().First(&airport, "ID = ?", input.ID)
 
@@ -39,9 +39,10 @@ func (a *AirportRepo) Save(input *domain.Airport) (*domain.Airport, error) {
 	return &airport, nil
 }
 
-func (a *AirportRepo) Update(input *domain.Airport) (*domain.Airport, error) {
+func (a *AirportRepository) Update(input *domain.Airport) (*domain.Airport, error) {
 	var airport domain.Airport
-	db := a.db.Model(&airport)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&airport)
 
 	checkAirportExist := db.Debug().Where(&airport, "ID = ?", input.ID)
 
@@ -63,9 +64,10 @@ func (a *AirportRepo) Update(input *domain.Airport) (*domain.Airport, error) {
 	return &airport, nil
 }
 
-func (a *AirportRepo) Get(id int) (*domain.Airport, error) {
+func (a *AirportRepository) Get(id int) (*domain.Airport, error) {
 	var airport domain.Airport
-	db := a.db.Model(&airport)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&airport)
 
 	checkAirportExist := db.Debug().Where(&airport, "ID = ?", id)
 
@@ -82,9 +84,10 @@ func (a *AirportRepo) Get(id int) (*domain.Airport, error) {
 	return &airport, nil
 }
 
-func (a *AirportRepo) GetAll() (*[]domain.Airport, error) {
+func (a *AirportRepository) GetAll() (*[]domain.Airport, error) {
 	var airports []domain.Airport
-	db := a.db.Model(&airports)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&airports)
 
 	checkAirportExist := db.Debug().Find(&airports)
 
@@ -101,12 +104,13 @@ func (a *AirportRepo) GetAll() (*[]domain.Airport, error) {
 	return &airports, nil
 }
 
-func (a *AirportRepo) Delete(id int) error {
+func (a *AirportRepository) Delete(id int) error {
 	airport, err := a.Get(id)
 	if err != nil {
 		return err
 	}
-	db := a.db.Model(&airport)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&airport)
 	deleted := db.Debug().Delete(airport).Commit()
 	if deleted.Error != nil {
 		return deleted.Error
