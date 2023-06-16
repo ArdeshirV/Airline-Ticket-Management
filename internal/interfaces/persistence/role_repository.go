@@ -1,21 +1,21 @@
-package persistance
+package persistence
 
 import (
 	"errors"
-	"github.com/the-go-dragons/final-project/internal/domain"
-	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
+
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
-type RoleRepository struct {
-}
+type RoleRepository struct{}
 
-func (a *RoleRepository) New() *RoleRepository {
+func NewRoleRepository() *RoleRepository {
 	return &RoleRepository{}
 }
 
-func (a *RoleRepository) Create(input *domain.Role) (*domain.Role, error) {
+func (rr *RoleRepository) Create(input *domain.Role) (*domain.Role, error) {
 	var role domain.Role
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&role)
@@ -36,6 +36,36 @@ func (a *RoleRepository) Create(input *domain.Role) (*domain.Role, error) {
 	}
 
 	return &role, nil
+}
+
+func (rr *RoleRepository) GetById(id int) (*domain.Role, error) {
+	var role domain.Role
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&role)
+
+	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
+
+	if checkRoleExist.RowsAffected <= 0 {
+		return &role, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	tx := checkRoleExist.Find(&role)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
+func (rr *RoleRepository) GetByName(name string) (*domain.Role, error) {
+	role := new(domain.Role)
+	db, _ := database.GetDatabaseConnection()
+	db.Where("name = ?", name).First(&role)
+	if role.ID == 0 {
+		return nil, errors.New("Role not found")
+	}
+	return role, nil
 }
 
 func (a *RoleRepository) Update(input *domain.Role) (*domain.Role, error) {
@@ -63,25 +93,25 @@ func (a *RoleRepository) Update(input *domain.Role) (*domain.Role, error) {
 	return &role, nil
 }
 
-func (a *RoleRepository) Get(id int) (*domain.Role, error) {
-	var role domain.Role
-	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&role)
+// func (a *RoleRepository) Get(id int) (*domain.Role, error) {
+// 	var role domain.Role
+// 	db, _ := database.GetDatabaseConnection()
+// 	db = db.Model(&role)
 
-	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
+// 	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
 
-	if checkRoleExist.RowsAffected <= 0 {
-		return &role, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
+// 	if checkRoleExist.RowsAffected <= 0 {
+// 		return &role, errors.New(strconv.Itoa(http.StatusNotFound))
+// 	}
 
-	tx := checkRoleExist.Find(&role)
+// 	tx := checkRoleExist.Find(&role)
 
-	if err := tx.Error; err != nil {
-		return nil, err
-	}
+// 	if err := tx.Error; err != nil {
+// 		return nil, err
+// 	}
 
-	return &role, nil
-}
+// 	return &role, nil
+// }
 
 func (a *RoleRepository) GetAll() (*[]domain.Role, error) {
 	var roles []domain.Role
@@ -104,7 +134,7 @@ func (a *RoleRepository) GetAll() (*[]domain.Role, error) {
 }
 
 func (a *RoleRepository) Delete(id int) error {
-	role, err := a.Get(id)
+	role, err := a.GetById(id)
 	if err != nil {
 		return err
 	}

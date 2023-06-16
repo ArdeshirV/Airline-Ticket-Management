@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	handlers "github.com/the-go-dragons/final-project/internal/interfaces/http"
-	persistence "github.com/the-go-dragons/final-project/internal/interfaces/persistence"
+	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 	"github.com/the-go-dragons/final-project/internal/usecase"
 )
 
@@ -32,15 +32,24 @@ func (application *App) Start(portAddress string) error {
 func routing(e *echo.Echo) {
 	userRepo := persistence.NewUserRepository()
 	userUsecase := usecase.NewUserUsecase(userRepo)
-	UserHandler := handlers.NewUserHandler(userUsecase)
+
+	roleRepo := persistence.NewRoleRepository()
+	roleUsecase := usecase.NewRoleUsecase(roleRepo)
+
+	UserHandler := handlers.NewUserHandler(userUsecase, roleUsecase)
+	RoleHandler := handlers.NewRoleHandler(roleUsecase)
+
+	// UserHandler := handlers.NewUserHandler(roleUsecase)
 
 	handlers.MockRoutes(e)
 	handlers.MainRoutes(e)
 
+	_ = RoleHandler
+
 	// public routing
 	e.POST("/signup", UserHandler.Signup)
-	// e.POST("/login", UserController.Login)
-	// e.POST("/token", UserController.GetToken)
+	e.POST("/login", UserHandler.Login)
+	e.GET("/logout", UserHandler.Logout)
 
 	// protected routing
 	// e.GET("/now", UserController.GetTime, middlewares.IsLoggedIn, middlewares.IsAdmin)

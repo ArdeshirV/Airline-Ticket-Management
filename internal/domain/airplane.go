@@ -1,9 +1,9 @@
 package domain
 
-import _ "gorm.io/gorm"
+import "gorm.io/gorm"
 
 type Airplane struct {
-	ID        uint
+	gorm.Model
 	Name      string
 	AirlineID uint
 	Airline   Airline
