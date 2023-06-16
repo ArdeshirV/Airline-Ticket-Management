@@ -14,4 +14,5 @@ type User struct {
 	RoleID     uint
 	Role       Role
 	Passengers []Passenger
+	IsLoginRequired bool `gorm:"default:false"`
 }
