@@ -61,7 +61,7 @@ func GenerateToken (user *domain.User) (string, error) {
 	return tokenString, nil
 }
 
-func (sh *SignupHandler) Login(c echo.Context) error {
+func (uh *UserHandler) Login(c echo.Context) error {
 	var request LoginRequest
 	var user *domain.User
 
@@ -76,7 +76,7 @@ func (sh *SignupHandler) Login(c echo.Context) error {
 	}
 
 	// Check for dupplication
-	user, err = sh.usecase.GetUserByEmail(request.Email)
+	user, err = uh.userUsecase.GetUserByEmail(request.Email)
 	if err != nil {
 		return c.JSON(http.StatusConflict, LoginMassageResponse{Message: "No user found with this credentials", Result:nil})
 	}
