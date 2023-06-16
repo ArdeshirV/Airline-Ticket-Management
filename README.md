@@ -9,6 +9,7 @@
 │   │   └── app.go
 │   ├── domain -----------------------------> Encapsulate Business Rules (Entities Layer)
 │   │   ├── booking.go
+│   │   ├── airplane.go
 │   │   ├── airline.go
 │   │   ├── airport.go
 │   │   ├── city.go

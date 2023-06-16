@@ -93,6 +93,7 @@ func AutoMigrateDB() error {
 	// Add new models here
 	err := db.AutoMigrate(
 		&model.Airline{},
+		&model.Airplane{},
 		&model.Airport{},
 		&model.City{},
 		&model.Flight{},

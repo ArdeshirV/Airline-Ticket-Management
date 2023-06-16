@@ -13,7 +13,7 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
-var key = []byte(fmt.Sprintf("%d", config.GetEnv("ENCRYPTION_SECRET_KEY", "encryptionSeretKey")))
+var key = []byte(fmt.Sprintf("%s", config.GetEnv("ENCRYPTION_SECRET_KEY", "encryptionSeretKey")))
 
 func Encrypt(plaintext interface{}) (string, error) {
     // Convert the plaintext to a byte array
