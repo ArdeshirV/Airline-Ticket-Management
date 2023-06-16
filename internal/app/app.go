@@ -39,7 +39,7 @@ func routing(e *echo.Echo) {
 
 	// public routing
 	e.POST("/signup", UserHandler.Signup)
-	// e.POST("/login", UserController.Login)
+	e.POST("/login", UserHandler.Login)
 	// e.POST("/token", UserController.GetToken)
 
 	// protected routing

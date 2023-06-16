@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -61,6 +62,7 @@ func (sh *SignupHandler) Signup(c echo.Context) error {
 	}
 	_, err = sh.usecase.CreateUser(&user)
 	if err != nil {
+		fmt.Printf("err: %v\n", err)
 		return c.JSON(http.StatusInternalServerError, MassageResponse{Message: "Cant create user"})
 	}
 

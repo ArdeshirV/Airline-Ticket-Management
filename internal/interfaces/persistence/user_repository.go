@@ -15,6 +15,7 @@ func NewUserRepository() *UserRepository {
 
 func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
 	db, _ := database.GetDatabaseConnection()
+	user.RoleID = 1
 	result := db.Create(&user)
 	if result.Error != nil {
 		return nil, result.Error
