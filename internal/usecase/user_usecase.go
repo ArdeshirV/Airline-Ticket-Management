@@ -33,6 +33,10 @@ func (ur *UserUsecase) CreateUser(user *domain.User) (*domain.User, error) {
 	return ur.userRepository.Create(user)
 }
 
+func (ur *UserUsecase) GetUserById(id uint) (*domain.User, error) {
+	return ur.userRepository.GetById(id)
+}
+
 func (ur *UserUsecase) GetUserByEmail(email string) (*domain.User, error) {
 	return ur.userRepository.GetByEmail(email)
 }

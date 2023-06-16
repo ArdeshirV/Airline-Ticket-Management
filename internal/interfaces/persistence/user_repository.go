@@ -22,6 +22,16 @@ func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
+func (ur *UserRepository) GetById(id uint) (*domain.User, error) {
+	user := new(domain.User)
+	db, _ := database.GetDatabaseConnection()
+	db.Where("id = ?", id).First(&user)
+	if user.ID == 0 {
+		return nil, errors.New("User not found")
+	}
+	return user, nil
+}
+
 func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	user := new(domain.User)
 	db, _ := database.GetDatabaseConnection()

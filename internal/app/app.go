@@ -49,6 +49,7 @@ func routing(e *echo.Echo) {
 	// public routing
 	e.POST("/signup", UserHandler.Signup)
 	e.POST("/login", UserHandler.Login)
+	e.GET("/logout", UserHandler.Logout)
 	// e.POST("/token", UserController.GetToken)
 
 	// protected routing
