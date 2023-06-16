@@ -25,10 +25,14 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 
 	JwtTokenSecretConfig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "mySecretKey")
 
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
 		return []byte(JwtTokenSecretConfig), nil
 	})
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
+	}
 
 	// Check if the token is valid
 	if !token.Valid {
