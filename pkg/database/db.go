@@ -3,22 +3,13 @@ package database
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	model "github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
-// This function can be used to get ENV Var with default value
-func getenv(key, defaultVal string) string {
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		return defaultVal
-	}
-	return value
-}
 
 var user string
 var password string
@@ -31,13 +22,13 @@ var dbConn *gorm.DB
 
 // To initialize db config
 func init() {
-	user = getenv("POSTGRES_USER", "admin")
-	password = getenv("POSTGRES_PASSWORD", "admin")
-	db = getenv("POSTGRES_DB", "gormDb2")
-	host = getenv("DATABASE_HOST", "127.0.0.1")
-	port = getenv("DATABASE_PORT", "5432")
-	ssl = getenv("POSTGRES_SSL", "disable")
-	timezone = getenv("POSTGRES_TIMEZONE", "Asia/Tehran")
+	user = config.GetEnv("POSTGRES_USER", "admin")
+	password = config.GetEnv("POSTGRES_PASSWORD", "admin")
+	db = config.GetEnv("POSTGRES_DB", "gormDb2")
+	host = config.GetEnv("DATABASE_HOST", "127.0.0.1")
+	port = config.GetEnv("DATABASE_PORT", "5432")
+	ssl = config.GetEnv("POSTGRES_SSL", "disable")
+	timezone = config.GetEnv("POSTGRES_TIMEZONE", "Asia/Tehran")
 }
 
 func GetDSN() string {

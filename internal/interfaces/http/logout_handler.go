@@ -56,6 +56,4 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 	uh.userUsecase.UpdateById(intUserId, user)
 
 	return c.JSON(http.StatusOK, Response{Message: "you logged out successfully", Result: nil})
-
-	return nil
 }

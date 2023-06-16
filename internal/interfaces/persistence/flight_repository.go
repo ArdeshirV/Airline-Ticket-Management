@@ -1,11 +1,12 @@
-package persistance
+package persistence
 
 import (
 	"errors"
-	"github.com/the-go-dragons/final-project/internal/domain"
-	"github.com/the-go-dragons/final-project/pkg/database"
 	"net/http"
 	"strconv"
+
+	"github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
 type FlightRepository struct {
@@ -33,7 +34,7 @@ func (a *FlightRepository) Create(input *domain.Flight) (*domain.Flight, error) 
 	flight.ArrivalTime = input.ArrivalTime
 	flight.FlightClass = input.FlightClass
 	flight.Price = input.Price
-	flight.Capacity = input.Capacity
+	flight.RemainingCapacity = input.RemainingCapacity
 	flight.CancelCondition = input.CancelCondition
 
 	addNewFlight := db.Debug().Create(&flight).Commit()
@@ -59,7 +60,7 @@ func (a *FlightRepository) Update(input *domain.Flight) (*domain.Flight, error) 
 	tx := checkCityExist.Update("ID", input.ID).Update("FlightNo", input.FlightNo).Update("Departure", input.Departure)
 	tx = tx.Update("Destination", input.Destination).Update("DepartureTime", input.DepartureTime).Update("ArrivalTime", input.ArrivalTime)
 	tx = tx.Update("FlightClass", input.FlightClass).Update("Price", input.Price)
-	tx = tx.Update("Capacity", input.Capacity).Update("CancelCondition", input.CancelCondition)
+	tx = tx.Update("Capacity", input.RemainingCapacity).Update("CancelCondition", input.CancelCondition)
 
 	if err := tx.Error; err != nil {
 		return nil, err
