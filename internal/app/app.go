@@ -32,10 +32,19 @@ func (application *App) Start(portAddress string) error {
 func routing(e *echo.Echo) {
 	userRepo := persistence.NewUserRepository()
 	userUsecase := usecase.NewUserUsecase(userRepo)
-	UserHandler := handlers.NewUserHandler(userUsecase)
+
+	roleRepo := persistence.NewRoleRepository()
+	roleUsecase := usecase.NewRoleUsecase(roleRepo)
+
+	UserHandler := handlers.NewUserHandler(userUsecase, roleUsecase)
+	RoleHandler := handlers.NewRoleHandler(roleUsecase)
+
+	// UserHandler := handlers.NewUserHandler(roleUsecase)
 
 	handlers.MockRoutes(e)
 	handlers.MainRoutes(e)
+
+	_ = RoleHandler
 
 	// public routing
 	e.POST("/signup", UserHandler.Signup)

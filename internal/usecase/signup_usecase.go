@@ -9,12 +9,13 @@ import (
 )
 
 type UserUsecase struct {
-	repository *persistence.UserRepository
+	userRepository *persistence.UserRepository
+	roleRepository *persistence.RoleRepository
 }
 
 func NewUserUsecase(repository *persistence.UserRepository) *UserUsecase {
 	return &UserUsecase{
-		repository: repository,
+		userRepository: repository,
 	}
 }
 
@@ -29,13 +30,13 @@ func (ur *UserUsecase) CreateUser(user *domain.User) (*domain.User, error) {
 	}
 	user.Password = string(encryptedPassword)
 
-	return ur.repository.Create(user)
+	return ur.userRepository.Create(user)
 }
 
 func (ur *UserUsecase) GetUserByEmail(email string) (*domain.User, error) {
-	return ur.repository.GetByEmail(email)
+	return ur.userRepository.GetByEmail(email)
 }
 
 func (ur *UserUsecase) GetUserByUsername(username string) (*domain.User, error) {
-	return ur.repository.GeByUsername(username)
+	return ur.userRepository.GeByUsername(username)
 }
