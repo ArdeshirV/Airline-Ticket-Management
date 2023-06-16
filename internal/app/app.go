@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	handlers "github.com/the-go-dragons/final-project/internal/interfaces/http"
-	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
+	persistence "github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 	"github.com/the-go-dragons/final-project/internal/usecase"
 )
 
