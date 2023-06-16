@@ -59,6 +59,7 @@ func (sh *SignupHandler) Signup(c echo.Context) error {
 		Username: request.Username,
 		Password: request.Password,
 		Phone:    request.Phone,
+		RoleID: 1,
 	}
 	_, err = sh.usecase.CreateUser(&user)
 	if err != nil {
