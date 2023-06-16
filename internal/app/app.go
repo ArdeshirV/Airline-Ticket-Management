@@ -34,6 +34,10 @@ func routing(e *echo.Echo) {
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	UserHandler := handlers.NewUserHandler(userUsecase)
 
+	roleRepo := persistence.NewRoleRepository()
+	_ = usecase.NewRoleUsecase(roleRepo)
+	// UserHandler := handlers.NewUserHandler(roleUsecase)
+
 	handlers.MockRoutes(e)
 	handlers.MainRoutes(e)
 
