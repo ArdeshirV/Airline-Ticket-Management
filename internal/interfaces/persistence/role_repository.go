@@ -1,44 +1,118 @@
-package persistence
+package persistance
 
 import (
 	"errors"
-
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
+	"net/http"
+	"strconv"
 )
 
-type RoleRepository struct{}
+type RoleRepository struct {
+}
 
-func NewRoleRepository() *RoleRepository {
+func (a *RoleRepository) New() *RoleRepository {
 	return &RoleRepository{}
 }
 
-func (rr *RoleRepository) Create(role *domain.Role) (*domain.Role, error) {
-	
+func (a *RoleRepository) Create(input *domain.Role) (*domain.Role, error) {
+	var role domain.Role
 	db, _ := database.GetDatabaseConnection()
-	result := db.Create(&role)
-	if result.Error != nil {
-		return nil, result.Error
+	db = db.Model(&role)
+
+	checkRoleExist := db.Debug().First(&role, "ID = ?", input.ID)
+
+	if checkRoleExist.RowsAffected > 0 {
+		return &role, errors.New(strconv.Itoa(http.StatusConflict))
 	}
-	return role, nil
+
+	role.Name = input.Name
+	role.Description = input.Description
+
+	addNewRole := db.Debug().Create(&role).Commit()
+
+	if addNewRole.RowsAffected < 1 {
+		return &role, errors.New(strconv.Itoa(http.StatusForbidden))
+	}
+
+	return &role, nil
 }
 
-func (rr *RoleRepository) GetById(id uint) (*domain.Role, error) {
-	role := new(domain.Role)
+func (a *RoleRepository) Update(input *domain.Role) (*domain.Role, error) {
+	var role domain.Role
 	db, _ := database.GetDatabaseConnection()
-	db.Where("id = ?", id).First(&role)
-	if role.ID == 0 {
-		return nil, errors.New("Role not found")
+	db = db.Model(&role)
+
+	checkRoleExist := db.Debug().Where(&role, "ID = ?", input.ID)
+
+	if checkRoleExist.RowsAffected <= 0 {
+		return &role, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
-	return role, nil
+
+	tx := checkRoleExist.Update("ID", input.ID).Update("Name", input.Name).Update("Description", input.Description)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	} else {
+		updatedRole := tx.Commit()
+		if updatedRole.RowsAffected < 1 {
+			return &role, errors.New(strconv.Itoa(http.StatusForbidden))
+		}
+	}
+
+	return &role, nil
 }
 
-func (rr *RoleRepository) GetByName(name string) (*domain.Role, error) {
-	role := new(domain.Role)
+func (a *RoleRepository) Get(id int) (*domain.Role, error) {
+	var role domain.Role
 	db, _ := database.GetDatabaseConnection()
-	db.Where("name = ?", name).First(&role)
-	if role.ID == 0 {
-		return nil, errors.New("Role not found")
+	db = db.Model(&role)
+
+	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
+
+	if checkRoleExist.RowsAffected <= 0 {
+		return &role, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
-	return role, nil
+
+	tx := checkRoleExist.Find(&role)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
+func (a *RoleRepository) GetAll() (*[]domain.Role, error) {
+	var roles []domain.Role
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&roles)
+
+	checkRoleExist := db.Debug().Find(&roles)
+
+	if checkRoleExist.RowsAffected <= 0 {
+		return &roles, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	tx := db.Debug().Find(&roles)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &roles, nil
+}
+
+func (a *RoleRepository) Delete(id int) error {
+	role, err := a.Get(id)
+	if err != nil {
+		return err
+	}
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&role)
+	deleted := db.Debug().Delete(role).Commit()
+	if deleted.Error != nil {
+		return deleted.Error
+	}
+	return nil
 }
