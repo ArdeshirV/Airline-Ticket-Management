@@ -22,6 +22,16 @@ func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
+func (ur *UserRepository) GetById(id uint) (*domain.User, error) {
+	user := new(domain.User)
+	db, _ := database.GetDatabaseConnection()
+	db.Where("id = ?", id).First(&user)
+	if user.ID == 0 {
+		return nil, errors.New("User not found")
+	}
+	return user, nil
+}
+
 func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	user := new(domain.User)
 	db, _ := database.GetDatabaseConnection()
@@ -39,5 +49,20 @@ func (ur *UserRepository) GeByUsername(username string) (*domain.User, error) {
 	if user.ID == 0 {
 		return nil, errors.New("User not found")
 	}
+	return user, nil
+}
+
+func (ur *UserRepository) UpdateById(id uint, newUser *domain.User) (*domain.User, error) {
+	db, _ := database.GetDatabaseConnection()
+	user := new(domain.User)
+	result := db.First(&user, id)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	user.IsLoginRequired = newUser.IsLoginRequired
+	db.Save(&user)
+
 	return user, nil
 }

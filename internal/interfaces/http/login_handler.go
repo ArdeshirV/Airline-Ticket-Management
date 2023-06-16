@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -23,7 +22,7 @@ type LoginResult struct {
 	Token string `json:"token"`
 }
 
-type LoginMassageResponse struct {
+type Response struct {
 	Message string `json:"message"`
 	Result *LoginResult `json:"result"`
 }
@@ -41,14 +40,9 @@ func GenerateToken (user *domain.User) (string, error) {
 
 	duration := time.Duration(uintExpirationCofigHoursValue) * time.Hour
 	expirationTime := time.Now().Add(duration) 
-
-	idBytes := []byte(fmt.Sprintf("%d", user.ID))
-	hashedUserId, err := bcrypt.GenerateFromPassword(
-		idBytes,
-		bcrypt.DefaultCost,
-	)
+	
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": hashedUserId,
+		"userId": user.ID,
 		"exp":    expirationTime.Unix(),
 	})
 
@@ -68,17 +62,17 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	// Check the body data
 	err := c.Bind(&request)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, LoginMassageResponse{Message: "Invalid body request", Result:nil})
+		return c.JSON(http.StatusBadRequest, Response{Message: "Invalid body request", Result:nil})
 	}
 
 	if  request.Email == "" || request.Password == "" {
-		return c.JSON(http.StatusBadRequest, LoginMassageResponse{Message: "Missing required fields", Result:nil})
+		return c.JSON(http.StatusBadRequest, Response{Message: "Missing required fields", Result:nil})
 	}
 
 	// Check for dupplication
 	user, err = uh.userUsecase.GetUserByEmail(request.Email)
 	if err != nil {
-		return c.JSON(http.StatusConflict, LoginMassageResponse{Message: "No user found with this credentials", Result:nil})
+		return c.JSON(http.StatusConflict, Response{Message: "No user found with this credentials", Result:nil})
 	}
 
 	equalErr := bcrypt.CompareHashAndPassword(
@@ -87,17 +81,20 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	
 	if equalErr == nil {
 		token, err := GenerateToken(user)
-		fmt.Printf("\"here\": %v\n", "here")
+
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, LoginMassageResponse{Message: "Server Error", Result:nil})
+			return c.JSON(http.StatusBadRequest, Response{Message: "Server Error", Result:nil})
 		}
 
 		result := &LoginResult{
 			Token: token,
 		}
 
-		return c.JSON(http.StatusOK, LoginMassageResponse{Message: "login", Result:result})
+		user.IsLoginRequired = false
+		uh.userUsecase.UpdateById(uint(user.ID), user)
+
+		return c.JSON(http.StatusOK, Response{Message: "You logged in successfully", Result:result})
 	}
 
-	return c.JSON(http.StatusConflict, LoginMassageResponse{Message: "No user found with this credentials", Result:nil })
+	return c.JSON(http.StatusConflict, Response{Message: "No user found with this credentials", Result:nil })
 }
