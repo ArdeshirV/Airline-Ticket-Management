@@ -62,7 +62,11 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	// Check the body data
 	err := c.Bind(&request)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, Response{Message: "Invalid body request", Result: nil})
+		return c.JSON(http.StatusBadRequest, Response{Message: "Invalid body request", Result: nil}) 
+		// TODO: all Responses should be in a standard
+
+		// TODO: response messages should be mutli language
+		// we can use i18 library
 	}
 
 	if request.Email == "" || request.Password == "" {
@@ -75,6 +79,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusConflict, Response{Message: "No user found with this credentials", Result: nil})
 	}
 
+	// Check if password is correct
 	equalErr := bcrypt.CompareHashAndPassword(
 		[]byte(user.Password),
 		[]byte(request.Password))
@@ -90,6 +95,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 			Token: token,
 		}
 
+		// update IsLoginRequired field 
 		user.IsLoginRequired = false
 		uh.userUsecase.UpdateById(uint(user.ID), user)
 
