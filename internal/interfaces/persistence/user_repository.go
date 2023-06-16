@@ -41,3 +41,18 @@ func (ur *UserRepository) GeByUsername(username string) (*domain.User, error) {
 	}
 	return user, nil
 }
+
+func (ur *UserRepository) UpdateById(id uint, newUser *domain.User) (*domain.User, error) {
+	db, _ := database.GetDatabaseConnection()
+	user := new(domain.User)
+	result := db.First(&user, id)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	user.IsLoginRequired = newUser.IsLoginRequired
+	db.Save(&user)
+
+	return user, nil
+}

@@ -32,16 +32,16 @@ func Run() {
 	if err != nil {
 		role, _ := roleRepository.GetByName("user")
 		encryptedPassword, _ := bcrypt.GenerateFromPassword(
-			[]byte("12345678"),
+			[]byte("12345678"), // TODO should read from db
 			bcrypt.DefaultCost,
 		)
 		hashedPassword := string(encryptedPassword)
 
 		newUser := domain.User{
-			Email:    "admin@gmail.com", // TODO
-			Username: "admin", // TODO
+			Email:    "admin@gmail.com", // TODO should read from db
+			Username: "admin", // TODO should read from db
 			Password: hashedPassword,
-			Phone:    "09035193426", // TODO
+			Phone:    "09035193426", // TODO should read from db
 			RoleID: role.ID,
 		}
 

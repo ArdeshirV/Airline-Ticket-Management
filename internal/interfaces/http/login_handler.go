@@ -47,6 +47,7 @@ func GenerateToken (user *domain.User) (string, error) {
 		idBytes,
 		bcrypt.DefaultCost,
 	)
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": hashedUserId,
 		"exp":    expirationTime.Unix(),
@@ -95,6 +96,9 @@ func (uh *UserHandler) Login(c echo.Context) error {
 		result := &LoginResult{
 			Token: token,
 		}
+
+		user.IsLoginRequired = false
+		uh.userUsecase.UpdateById(uint(user.ID), user)
 
 		return c.JSON(http.StatusOK, LoginMassageResponse{Message: "login", Result:result})
 	}
