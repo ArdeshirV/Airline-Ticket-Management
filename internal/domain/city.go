@@ -4,5 +4,5 @@ import "gorm.io/gorm"
 
 type City struct {
 	gorm.Model
-	Name string
+	Name string `json:"name"`
 }

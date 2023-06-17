@@ -4,8 +4,8 @@ import "gorm.io/gorm"
 
 type Airport struct {
 	gorm.Model
-	Name     string
-	CityID   uint
-	City     City
-	Terminal string
+	Name     string `json:"name"`
+	CityID   uint   `json:"cityid"`
+	City     City   `json:"city"`
+	Terminal string `json:"terminal"`
 }
