@@ -21,7 +21,7 @@ var timezone string
 var dbConn *gorm.DB
 
 // To initialize db config
-func init() {
+func init() { // todo: remove this init, use a loaded config object, or simply os.GetEnv in your GetDSN function
 	user = config.GetEnv("POSTGRES_USER", "admin")
 	password = config.GetEnv("POSTGRES_PASSWORD", "admin")
 	db = config.GetEnv("POSTGRES_DB", "gormDb2")
