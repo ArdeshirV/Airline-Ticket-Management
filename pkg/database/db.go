@@ -5,7 +5,10 @@ import (
 	"log"
 	"time"
 
-	model "github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/golang-migrate/migrate/v4"
+	pg "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -90,23 +93,27 @@ func CloseDBConnection(conn *gorm.DB) {
 }
 
 func AutoMigrateDB() error {
-	db, connErr := GetDatabaseConnection()
-	if connErr != nil {
-		return connErr
+	conn, err := GetDatabaseConnection()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// Add new models here
-	err := db.AutoMigrate(
-		&model.Airline{},
-		&model.Airplane{},
-		&model.Airport{},
-		&model.City{},
-		&model.Flight{},
-		&model.Passenger{},
-		&model.Payment{},
-		&model.Role{},
-		&model.Ticket{},
-		&model.User{},
-	)
+	sqlDB, err := conn.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	driver, err := pg.WithInstance(sqlDB, &pg.Config{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	migrate, err := migrate.NewWithDatabaseInstance(
+		"file://./pkg/database/migrations",
+		"postgres", driver)
+	if err != nil {
+		log.Fatal(err)
+	}
+	migrate.Up()
 	return err
 }
