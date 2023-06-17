@@ -32,8 +32,8 @@ type LoginHandler struct {
 }
 
 func GenerateToken(user *domain.User) (string, error) {
-	expirationHoursCofig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "1")
-	JwtTokenSecretConfig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "mySecretKey")
+	expirationHoursCofig := config.Get(config.JwtTokenExpireHours)
+	JwtTokenSecretConfig := config.Get(config.JwtTokenSecretKey)
 
 	expirationCofigHoursValue, _ := strconv.ParseUint(expirationHoursCofig, 10, 64)
 	uintExpirationCofigHoursValue := uint(expirationCofigHoursValue)
@@ -62,7 +62,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	// Check the body data
 	err := c.Bind(&request)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, Response{Message: "Invalid body request", Result: nil}) 
+		return c.JSON(http.StatusBadRequest, Response{Message: "Invalid body request", Result: nil})
 		// TODO: all Responses should be in a standard
 
 		// TODO: response messages should be mutli language
@@ -95,7 +95,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 			Token: token,
 		}
 
-		// update IsLoginRequired field 
+		// update IsLoginRequired field
 		user.IsLoginRequired = false
 		uh.userUsecase.UpdateById(uint(user.ID), user)
 
