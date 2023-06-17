@@ -24,7 +24,7 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 	}
 
     tokenString := strings.TrimPrefix(authHeader, "Bearer ") // Todo: add to env
-	JwtTokenSecretConfig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "mySecretKey") // Todo: add to env
+	JwtTokenSecretConfig := config.Get(config.JwtTokenExpireHours)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
 		return []byte(JwtTokenSecretConfig), nil

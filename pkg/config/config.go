@@ -1,28 +1,138 @@
 package config
 
 import (
+	"bufio"
 	"log"
 	"os"
+	"fmt"
+	"strings"
+	"sync"
+)
 
-	"github.com/joho/godotenv"
+// Config Public Interface ---------------------------------------------------------------
+const (
+	PortMain = iota
+	PortMock
+
+	PostgresUser
+	PostgresPassword
+	PostgresDB
+	PostgresSSL
+	PostgresTimezone
+	DatabasePort
+	DatabaseHost
+	PgadminPW
+	PgadminMail
+
+	JwtTokenSecretKey
+	JwtTokenExpireHours
+	EncryptionSecretKey
+
+	ReservedParameter
+)
+
+func Get(envVariableName int) string {
+	if configMap == nil {
+		initConfig()
+	}
+	variable := configMap[envVariableName]
+	if variable == "" {
+		errFmt := "Environment variable with index:%d is empty or it doesn't exists"
+		errMsg := fmt.Sprintf(errFmt, envVariableName)
+		log.Fatal(errMsg)
+	}
+	return configMap[envVariableName]
+}
+
+// Config Private Implementation ---------------------------------------------------------
+var (
+	configOnce sync.Once
+	configMap  map[int]string
 )
 
 func init() {
-	// TODO: Should create a thread-safe singleton here to handle configurations
+	initEnv()
+	defer initConfig()
 }
 
-func LoadEnvVariables() {
-	err := godotenv.Load(".env")
+func initConfig() {
+	err := loadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-// This function can be used to get ENV Var with default value
-func GetEnv(key, defaultVal string) string {
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		return defaultVal
+func loadConfig() error {
+	configOnce.Do(func() {
+		configMap = make(map[int]string)
+		configMap[PortMain] = getEnv("PORT_MAIN")
+		configMap[PortMock] = getEnv("PORT_MOCK")
+
+		configMap[PostgresUser] = getEnv("POSTGRES_USER")
+		configMap[PostgresPassword] = getEnv("POSTGRES_PASSWORD")
+		configMap[PostgresDB] = getEnv("POSTGRES_DB")
+		configMap[PostgresSSL] = getEnv("POSTGRES_SSL")
+		configMap[PostgresTimezone] = getEnv("POSTGRES_TIMEZONE")
+		configMap[DatabasePort] = getEnv("DATABASE_PORT")
+		configMap[DatabaseHost] = getEnv("DATABASE_HOST")
+		configMap[PgadminPW] = getEnv("PGADMIN_PW")
+		configMap[PgadminMail] = getEnv("PGADMIN_MAIL")
+
+		configMap[JwtTokenSecretKey] = getEnv("JWT_TOKEN_SECRET_KEY")
+		configMap[JwtTokenExpireHours] = getEnv("JWT_TOKEN_EXPIRE_HOURS")
+		configMap[EncryptionSecretKey] = getEnv("ENCRYPTION_SECRET_KEY")
+
+		configMap[ReservedParameter] = getEnv("RESERVED_PARAMETER")
+	})
+	return nil
+}
+
+// Env Private Implementation ------------------------------------------------------------
+const (
+	configFileName        = ".env"
+	separatorOfConfigFile = "="
+)
+
+var (
+	envOnce sync.Once
+	envMap  map[string]string
+)
+
+func initEnv() {
+	err := loadEnvFile()
+	if err != nil {
+		log.Fatal(err)
 	}
-	return value
+}
+
+func getEnv(envName string) string {
+	if envMap == nil {
+		initEnv()
+	}
+	return envMap[envName]
+}
+
+func loadEnvFile() error {
+	envOnce.Do(func() {
+		envMap = make(map[string]string)
+		envFile, err := os.Open(configFileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer envFile.Close()
+
+		scanner := bufio.NewScanner(envFile)
+		for scanner.Scan() {
+			line := scanner.Text()
+			keyVal := strings.Split(line, separatorOfConfigFile)
+			if len(keyVal) != 2 {
+				continue
+			}
+			envMap[keyVal[0]] = keyVal[1]
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+	})
+	return nil
 }
