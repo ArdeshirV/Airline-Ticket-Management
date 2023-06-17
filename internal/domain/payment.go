@@ -8,7 +8,7 @@ import (
 
 type Payment struct {
 	gorm.Model
-	PayAmount     int
-	PayTime       time.Time
-	PaymentSerial string
+	PayAmount     int       `json:"payamount"`
+	PayTime       time.Time `json:"paytime"`
+	PaymentSerial string    `json:"paymentserial"`
 }

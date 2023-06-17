@@ -23,7 +23,6 @@ func NewApp() *App {
 }
 
 func (application *App) Start(portAddress string) error {
-	fmt.Println("portAddress =", portAddress)
 	err := application.E.Start(fmt.Sprintf(":%s", portAddress))
 	application.E.Logger.Fatal(err)
 	return err

@@ -5,14 +5,14 @@ import (
 )
 
 type User struct {
-	ID              int
-	Username        string
-	Password        string
-	Email           string
-	Phone           string
-	CreatedAt       time.Time
-	RoleID          uint
-	Role            Role
-	Passengers      []Passenger
-	IsLoginRequired bool `gorm:"default:false"`
+	ID              int         `json:"id"`
+	Username        string      `json:"username"`
+	Password        string      `json:"password"`
+	Email           string      `json:"email"`
+	Phone           string      `json:"phone"`
+	CreatedAt       time.Time   `json:"createdat"`
+	RoleID          uint        `json:"roleid"`
+	Role            Role        `json:"role"`
+	Passengers      []Passenger `json:"passengers"`
+	IsLoginRequired bool        `json:"isloginrequired" gorm:"default:false"`
 }
