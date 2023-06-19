@@ -27,6 +27,20 @@ func Run() {
 		}
 	}
 
+	_, err = roleRepository.GetByName("admin")
+	if err != nil {
+
+		newRole := domain.Role{
+			Name:        "admin",
+			Description: "admin user",
+		}
+
+		_, err = roleRepository.Create(&newRole)
+		if err != nil {
+			fmt.Printf("could not run seeder: %v\n", err)
+		}
+	}
+
 	_, err = userRepository.GetByEmail("admin@gmail.com")
 
 	if err != nil {

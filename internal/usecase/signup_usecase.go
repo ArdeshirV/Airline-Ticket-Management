@@ -40,6 +40,9 @@ func (ur *UserUsecase) GetUserById(id uint) (*domain.User, error) {
 func (ur *UserUsecase) GetUserByEmail(email string) (*domain.User, error) {
 	return ur.userRepository.GetByEmail(email)
 }
+func (ur *UserUsecase) GetAll() (*[]domain.User, error) {
+	return ur.userRepository.GetAll()
+}
 
 func (ur *UserUsecase) GetUserByUsername(username string) (*domain.User, error) {
 	return ur.userRepository.GeByUsername(username)

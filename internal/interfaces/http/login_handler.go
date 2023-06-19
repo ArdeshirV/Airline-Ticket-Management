@@ -1,6 +1,8 @@
 package http
 
 import (
+	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,7 +12,6 @@ import (
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/usecase"
 	"github.com/the-go-dragons/final-project/pkg/config"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginRequest struct {
@@ -92,9 +93,16 @@ func (uh *UserHandler) Login(c echo.Context) error {
 
 		user.IsLoginRequired = false
 		uh.userUsecase.UpdateById(uint(user.ID), user)
+		SetUserToSession(c, user)
 
 		return c.JSON(http.StatusOK, Response{Message: "You logged in successfully", Result: result})
 	}
 
 	return c.JSON(http.StatusConflict, Response{Message: "No user found with this credentials", Result: nil})
+}
+
+func SetUserToSession(c echo.Context, user *domain.User) {
+	session := c.Get("session").(*sessions.Session)
+	session.Values["userID"] = user.ID
+	session.Save(c.Request(), c.Response())
 }
