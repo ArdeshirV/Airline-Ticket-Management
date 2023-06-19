@@ -50,16 +50,16 @@ func (uh *UserHandler) Signup(c echo.Context) error {
 	if err == nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "User already exists with the given email or username"})
 	}
+
 	_, err = uh.userUsecase.GetUserByUsername(request.Username)
 	if err == nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "User already exists with the given email or username"})
 	}
 
-	// Create the user
-	userRole, err := uh.roleUsecase.GetByName("user")
+	// Create the default role for user
+	userRole, err := uh.roleUsecase.GetByName("user") // Todo: add to env
 
 	if err != nil {
-		fmt.Printf("\"role\": %v\n", err)
 		return c.JSON(http.StatusInternalServerError, MassageResponse{Message: "Cant create user"})
 	}
 
@@ -70,6 +70,7 @@ func (uh *UserHandler) Signup(c echo.Context) error {
 		Phone:    request.Phone,
 		RoleID:   userRole.ID,
 	}
+
 	_, err = uh.userUsecase.CreateUser(&user)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)

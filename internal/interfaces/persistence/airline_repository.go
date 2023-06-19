@@ -10,6 +10,7 @@ import (
 )
 
 type AirlineRepository struct {
+	// todo: you could have a database connection as your repository struct, so you don't have to use something like this in each method: db, _ := database.GetDatabaseConnection()
 }
 
 func (r *AirlineRepository) New() *AirlineRepository {
@@ -18,7 +19,7 @@ func (r *AirlineRepository) New() *AirlineRepository {
 
 func (r *AirlineRepository) Create(input *domain.Airline) (*domain.Airline, error) {
 	var airline domain.Airline
-	db, _ := database.GetDatabaseConnection()
+	db, _ := database.GetDatabaseConnection() // todo: ignoring error, bad practice
 	db = db.Model(&airline)
 
 	checkAirlineExist := db.Debug().First(&airline, "ID = ?", input.ID)

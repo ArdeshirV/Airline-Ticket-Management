@@ -6,6 +6,6 @@ import (
 
 type Airline struct {
 	gorm.Model
-	Name string `gorm:"not null" json:"name"`
+	Name string `json:"name"  gorm:"not null"`
 	Logo string `json:"logo"`
 }

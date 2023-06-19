@@ -34,8 +34,8 @@ type LoginHandler struct {
 }
 
 func GenerateToken(user *domain.User) (string, error) {
-	expirationHoursCofig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "1")
-	JwtTokenSecretConfig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "mySecretKey")
+	expirationHoursCofig := config.Get(config.JwtTokenExpireHours)
+	JwtTokenSecretConfig := config.Get(config.JwtTokenSecretKey)
 
 	expirationCofigHoursValue, _ := strconv.ParseUint(expirationHoursCofig, 10, 64)
 	uintExpirationCofigHoursValue := uint(expirationCofigHoursValue)
@@ -65,6 +65,10 @@ func (uh *UserHandler) Login(c echo.Context) error {
 	err := c.Bind(&request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Message: "Invalid body request", Result: nil})
+		// TODO: all Responses should be in a standard
+
+		// TODO: response messages should be mutli language
+		// we can use i18 library
 	}
 
 	if request.Email == "" || request.Password == "" {
@@ -77,6 +81,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusConflict, Response{Message: "No user found with this credentials", Result: nil})
 	}
 
+	// Check if password is correct
 	equalErr := bcrypt.CompareHashAndPassword(
 		[]byte(user.Password),
 		[]byte(request.Password))
@@ -92,6 +97,7 @@ func (uh *UserHandler) Login(c echo.Context) error {
 			Token: token,
 		}
 
+		// update IsLoginRequired field
 		user.IsLoginRequired = false
 		uh.userUsecase.UpdateById(uint(user.ID), user)
 		SetUserToSession(c, user)

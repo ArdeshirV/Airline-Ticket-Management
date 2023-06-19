@@ -1,8 +1,8 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
@@ -15,22 +15,26 @@ type LogoutHandler struct {
 }
 
 func (uh *UserHandler) Logout(c echo.Context) error {
-	tokenString := c.Request().Header.Get("Authorization") // TODO: set in env
-	// Check if the token is empty
-	if tokenString == "" {
-		// Return a 401 Unauthorized response if no token was provided
-		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 
+	authHeader := c.Request().Header.Get("Authorization") // TODO: set in env
+
+	// Check if the token is empty
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
 
-	JwtTokenSecretConfig := config.GetEnv("JWT_TOKEN_EXPIRE_HOURS", "mySecretKey")
-
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ") // Todo: add to env
+	JwtTokenSecretConfig := config.Get(config.JwtTokenExpireHours)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
 		return []byte(JwtTokenSecretConfig), nil
 	})
 
-	// Check if the token is valid
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
+	}
+
+	// check if token is valid
 	if !token.Valid {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
@@ -41,17 +45,18 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
 
-	userId, _ := claims["userId"].(float64)
-	fmt.Printf("userId: %v\n", userId)
+	// Convert userId claim
+	userId, _ := claims["userId"].(float64) // Todo: add to env ( it can be in env)
 	intUserId := uint(userId)
-	fmt.Printf("intUserId: %v\n", intUserId)
 
+	// select user from db
 	user, error := uh.userUsecase.GetUserById(intUserId)
 
 	if error != nil {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
 
+	// update IsLoginRequired field in user
 	user.IsLoginRequired = true
 	uh.userUsecase.UpdateById(intUserId, user)
 

@@ -4,8 +4,8 @@ import "gorm.io/gorm"
 
 type Airplane struct {
 	gorm.Model
-	Name      string
-	AirlineID uint
-	Airline   Airline
-	Capacity  uint
+	Name      string  `json:"name"`
+	AirlineID uint    `json:"airlineid"`
+	Airline   Airline `json:"airline"`
+	Capacity  uint    `json:"capacity"`
 }

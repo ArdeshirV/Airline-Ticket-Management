@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/the-go-dragons/final-project/internal/app"
 	"github.com/the-go-dragons/final-project/pkg/config"
@@ -13,13 +12,12 @@ import (
 )
 
 func main() {
-	config.LoadEnvVariables()
 	database.CreateDBConnection()
 	err := database.AutoMigrateDB()
 	if err != nil {
-		fmt.Printf(err.Error())
+		fmt.Print(err.Error())
 	}
 	app := app.NewApp()
 	seeder.Run()
-	log.Fatalln(app.Start(os.Getenv("PORT_MAIN")))
+	log.Fatalln(app.Start(config.Get(config.PortMain)))
 }
