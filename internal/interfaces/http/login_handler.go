@@ -1,11 +1,12 @@
 package http
 
 import (
-	"github.com/gorilla/sessions"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
