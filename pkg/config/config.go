@@ -2,9 +2,9 @@ package config
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
-	"fmt"
 	"strings"
 	"sync"
 )
