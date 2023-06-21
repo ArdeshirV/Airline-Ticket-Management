@@ -2,6 +2,8 @@ package persistence
 
 import (
 	"errors"
+	"net/http"
+	"strconv"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
@@ -65,4 +67,58 @@ func (ur *UserRepository) UpdateById(id uint, newUser *domain.User) (*domain.Use
 	db.Save(&user)
 
 	return user, nil
+}
+
+func (ur *UserRepository) Get(id int) (*domain.User, error) {
+	var user domain.User
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&user)
+
+	checkUserExist := db.Debug().Where(&user, "ID = ?", id)
+
+	if checkUserExist.RowsAffected <= 0 {
+		return &user, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	tx := checkUserExist.Find(&user)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (ur *UserRepository) GetAll() (*[]domain.User, error) {
+	var users []domain.User
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&users)
+
+	checkUserExist := db.Debug().Find(&users)
+
+	if checkUserExist.RowsAffected <= 0 {
+		return &users, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	tx := db.Debug().Find(&users)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &users, nil
+}
+
+func (ur *UserRepository) Delete(id int) error {
+	user, err := ur.Get(id)
+	if err != nil {
+		return err
+	}
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&user)
+	deleted := db.Debug().Delete(user).Commit()
+	if deleted.Error != nil {
+		return deleted.Error
+	}
+	return nil
 }

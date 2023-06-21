@@ -23,5 +23,5 @@ go.work
 main
 main.exe
 
-# Local config folders
+# Ignore vscode configs
 .vscode

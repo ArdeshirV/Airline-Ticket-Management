@@ -16,14 +16,14 @@ type LogoutHandler struct {
 
 func (uh *UserHandler) Logout(c echo.Context) error {
 
-	authHeader  := c.Request().Header.Get("Authorization") // TODO: set in env
+	authHeader := c.Request().Header.Get("Authorization") // TODO: set in env
 
 	// Check if the token is empty
-	if authHeader  == "" {
+	if authHeader == "" {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
 
-    tokenString := strings.TrimPrefix(authHeader, "Bearer ") // Todo: add to env
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ") // Todo: add to env
 	JwtTokenSecretConfig := config.Get(config.JwtTokenExpireHours)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
