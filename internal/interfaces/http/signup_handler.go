@@ -56,7 +56,7 @@ func (uh *UserHandler) Signup(c echo.Context) error {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "User already exists with the given email or username"})
 	}
 
-	// Create the default role for user 
+	// Create the default role for user
 	userRole, err := uh.roleUsecase.GetByName("user") // Todo: add to env
 
 	if err != nil {
