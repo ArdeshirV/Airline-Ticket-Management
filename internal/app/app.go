@@ -39,13 +39,12 @@ func routing(e *echo.Echo) {
 	RoleHandler := handlers.NewRoleHandler(roleUsecase)
 
 	// UserHandler := handlers.NewUserHandler(roleUsecase)
-
-	handlers.MockRoutes(e)
-	handlers.MainRoutes(e)
-
 	_ = RoleHandler
 
 	// public routing
+	handlers.RootRoute(e)
+	handlers.FlightsRoute(e)
+
 	e.POST("/signup", UserHandler.Signup)
 	e.POST("/login", UserHandler.Login)
 	e.GET("/logout", UserHandler.Logout)
