@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -17,7 +18,22 @@ type APIResponse struct {
 	Message string `json: "message"`
 }
 
+type SortOption int
+
 const (
+	SortByPrice SortOption = iota
+	SortByDepartureDatetime
+	SortByArrivalDatetime
+	SortByDurationDatetime
+)
+
+const (
+
+	// sort types
+	AscendingSort = "asc"
+	DescendingSort = "desc"
+
+	// params constant
 	ParamTime = "time"
 	ParamCityA = "city_a"
 	ParamCityB = "city_b"
@@ -28,6 +44,12 @@ const (
 	ParamArriveDateTime = "arrive_datetime"
 	ParamAirplane = "airplane"
 	ParamAirline = "airline"
+
+	// sort params
+	ParamSortPrice = "sort_price"
+	ParamSortDuration = "sort_duration"
+	ParamSortArriveDatetime = "sort_arrive_datetime"
+	ParamSortDepatureDatetime  = "sort_depature_datetime"
 )
 
 func FlightsRoute(e *echo.Echo) {
@@ -43,6 +65,10 @@ func flightsHandler(ctx echo.Context) error {
 	arriveDatetime := ctx.QueryParam(ParamArriveDateTime)
 	airplane := ctx.QueryParam(ParamAirplane)
 	airline := ctx.QueryParam(ParamAirline)
+	priceSort := ctx.QueryParam(ParamSortPrice)
+	durationSort := ctx.QueryParam(ParamSortDuration)
+	arriveDatetimeSort := ctx.QueryParam(ParamSortArriveDatetime)
+	depatureDatetimeSort := ctx.QueryParam(ParamSortDepatureDatetime)
 
 	if flightNo != "" {
 		fliteredFlight, err := mock_api.GetFlightsByFlightNo(flightNo)
@@ -145,6 +171,10 @@ func flightsHandler(ctx echo.Context) error {
 		return echoJSON(ctx, http.StatusBadRequest, APIResponse{ Message: fmt.Sprintf("%v", err) })
 	}
 
+	fmt.Printf("ParamSortPrice: %v\n", ParamSortPrice)
+
+	data = data.ApplySort(ParamSortPrice, priceSort).ApplySort(ParamSortDuration, durationSort).ApplySort(ParamSortArriveDatetime, arriveDatetimeSort).ApplySort(ParamSortDepatureDatetime, depatureDatetimeSort)
+
 	return echoJSON(ctx, http.StatusOK, data)
 }
 
@@ -226,4 +256,67 @@ func (flights Flights) FilterFlightsByAirlineId(airlineId int) (Flights, error) 
 	}
 
 	return filteredFlights, nil
+}
+func (flights Flights) SortBy(sortOption SortOption, ascending bool) Flights {
+	switch sortOption {
+	case SortByPrice:
+		sort.Slice(flights, func(i, j int) bool {
+			if ascending {
+				return flights[i].Price < flights[j].Price
+			} else {
+				return flights[i].Price > flights[j].Price
+			}
+		})
+	case SortByDepartureDatetime:
+		sort.Slice(flights, func(i, j int) bool {
+			if ascending {
+				return flights[i].DepartureTime.Before(flights[j].DepartureTime)
+			} else {
+				return flights[i].DepartureTime.After(flights[j].DepartureTime)
+			}
+		})
+	case SortByArrivalDatetime:
+		sort.Slice(flights, func(i, j int) bool {
+			if ascending {
+				return flights[i].ArrivalTime.Before(flights[j].ArrivalTime)
+			} else {
+				return flights[i].ArrivalTime.After(flights[j].ArrivalTime)
+			}
+		})
+	case SortByDurationDatetime:
+		sort.Slice(flights, func(i, j int) bool {
+			durationI := flights[i].ArrivalTime.Sub(flights[i].DepartureTime)
+			durationJ := flights[j].ArrivalTime.Sub(flights[j].DepartureTime)
+			if ascending {
+				return durationI < durationJ
+			} else {
+				return durationI > durationJ
+			}
+		})
+	}
+
+	return flights
+}
+
+func (flights Flights) ApplySort (sortName string, sortValue string) Flights {
+	newFlights := make(Flights, 0)
+	isSortAscending := sortValue == "asc"
+
+	if sortName == ParamSortPrice {
+		newFlights = flights.SortBy(SortByPrice, isSortAscending)
+	}
+
+	if sortName == ParamSortDuration {
+		newFlights = flights.SortBy(SortByDurationDatetime, isSortAscending)
+	}
+
+	if sortName == ParamSortArriveDatetime {
+		newFlights = flights.SortBy(SortByArrivalDatetime, isSortAscending)
+	}
+
+	if sortName == ParamSortDepatureDatetime {
+		newFlights = flights.SortBy(SortByDepartureDatetime, isSortAscending)
+	}
+
+	return newFlights
 }
