@@ -37,7 +37,7 @@ func Get(envVariableName int) string {
 	}
 	variable := configMap[envVariableName]
 	if variable == "" {
-		errFmt := "Environment variable with index:%d is empty or it doesn't exists"
+		const errFmt = "Environment variable with index:%d is empty or it doesn't exists"
 		errMsg := fmt.Sprintf(errFmt, envVariableName)
 		log.Fatal(errMsg)
 	}
