@@ -12,7 +12,7 @@ import (
 type FlightRepository struct {
 }
 
-func (a *FlightRepository) New() *FlightRepository {
+func NewFlightRepository() *FlightRepository {
 	return &FlightRepository{}
 }
 
@@ -48,27 +48,17 @@ func (a *FlightRepository) Create(input *domain.Flight) (*domain.Flight, error) 
 
 func (a *FlightRepository) Update(input *domain.Flight) (*domain.Flight, error) {
 	var flight domain.Flight
-	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&flight)
-
-	checkCityExist := db.Debug().Where(&flight, "ID = ?", input.ID)
-
-	if checkCityExist.RowsAffected <= 0 {
-		return &flight, errors.New(strconv.Itoa(http.StatusNotFound))
+	_, err := a.Get(int(input.ID))
+	if err != nil {
+		return nil, err
 	}
+	db, _ := database.GetDatabaseConnection()
 
-	tx := checkCityExist.Update("ID", input.ID).Update("FlightNo", input.FlightNo).Update("Departure", input.Departure)
-	tx = tx.Update("Destination", input.Destination).Update("DepartureTime", input.DepartureTime).Update("ArrivalTime", input.ArrivalTime)
-	tx = tx.Update("FlightClass", input.FlightClass).Update("Price", input.Price)
-	tx = tx.Update("Capacity", input.RemainingCapacity).Update("CancelCondition", input.CancelCondition)
+	println(input.RemainingCapacity)
+	tx := db.Save(&input)
 
 	if err := tx.Error; err != nil {
 		return nil, err
-	} else {
-		updatedFlight := tx.Commit()
-		if updatedFlight.RowsAffected < 1 {
-			return &flight, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
 	}
 
 	return &flight, nil
@@ -77,20 +67,10 @@ func (a *FlightRepository) Update(input *domain.Flight) (*domain.Flight, error) 
 func (a *FlightRepository) Get(id int) (*domain.Flight, error) {
 	var flight domain.Flight
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&flight)
-
-	checkFlightExist := db.Debug().Where(&flight, "ID = ?", id)
-
-	if checkFlightExist.RowsAffected <= 0 {
-		return &flight, errors.New(strconv.Itoa(http.StatusNotFound))
+	tx := db.First(&flight, id)
+	if tx.Error != nil {
+		return &flight, tx.Error
 	}
-
-	tx := checkFlightExist.Find(&flight)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	}
-
 	return &flight, nil
 }
 
