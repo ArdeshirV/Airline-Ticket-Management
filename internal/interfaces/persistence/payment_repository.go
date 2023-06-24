@@ -12,32 +12,19 @@ import (
 type PaymentRepository struct {
 }
 
-func (a *PaymentRepository) New() *PaymentRepository {
+func NewPaymentRepository() *PaymentRepository {
 	return &PaymentRepository{}
 }
 
 func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, error) {
-	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&payment)
+	tx := db.Debug().Create(&input)
 
-	checkPaymentExist := db.Debug().First(&payment, "ID = ?", input.ID)
-
-	if checkPaymentExist.RowsAffected > 0 {
-		return &payment, errors.New(strconv.Itoa(http.StatusConflict))
+	if tx.Error != nil {
+		return input, tx.Error
 	}
 
-	payment.PayTime = input.PayTime
-	payment.PayAmount = input.PayAmount
-	payment.PaymentSerial = input.PaymentSerial
-
-	addNewPayment := db.Debug().Create(&payment).Commit()
-
-	if addNewPayment.RowsAffected < 1 {
-		return &payment, errors.New(strconv.Itoa(http.StatusForbidden))
-	}
-
-	return &payment, nil
+	return input, nil
 }
 
 func (a *PaymentRepository) Update(input *domain.Payment) (*domain.Payment, error) {
@@ -117,4 +104,18 @@ func (a *PaymentRepository) Delete(id int) error {
 		return deleted.Error
 	}
 	return nil
+}
+
+func (a *PaymentRepository) GetByOrderId(orderID int) (*domain.Payment, error) {
+	var payment domain.Payment
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&payment)
+
+	tx := db.Debug().Where("order_id = ?", orderID).First(&payment)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &payment, nil
 }
