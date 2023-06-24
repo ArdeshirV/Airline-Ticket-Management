@@ -82,7 +82,7 @@ func buildTicketDataList(m pdf.Maroto, data [][]string) error {
 		},
 		ContentProp: props.TableListContent{
 			Size:      8,
-			GridSizes: []uint{6, 6}, //{3, 7, 2}
+			GridSizes: []uint{6, 6},
 		},
 		Align:                consts.Left,
 		AlternatedBackground: &purpleColor,
