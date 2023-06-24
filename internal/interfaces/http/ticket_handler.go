@@ -12,7 +12,6 @@ import (
 
 const (
 	ParamTicketID = "ticketid"
-	// TicketFileName = "pdf/ticket.pdf"  // TODO: Put it into env & config file
 )
 
 func TicketRoute(e *echo.Echo) {
