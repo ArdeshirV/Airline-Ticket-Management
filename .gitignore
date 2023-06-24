@@ -20,8 +20,12 @@
 # Go workspace file
 go.work
 
+# Executable files
 main
 main.exe
 
 # Ignore vscode configs
 .vscode
+
+# Temporary ticket PDF file
+ticket.pdf

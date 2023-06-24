@@ -11,6 +11,16 @@ import (
 var Config *Configuration
 
 func init() {
+	Load()
+}
+
+func Load() {
+	if Config == nil {
+		load()
+	}
+}
+
+func load() {
 	conf, err := loadConfiguration(".", "config", "yml")
 	if err != nil {
 		log.Fatal("Loading viper config faild")
@@ -103,4 +113,8 @@ func loadConfiguration(configPath, configName, ConfigType string) (*Configuratio
 	}
 
 	return config, nil
+}
+
+func IsDebugModeEnabled() bool {
+	return Config.App.DebugMode
 }
