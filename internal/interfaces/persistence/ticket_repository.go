@@ -12,7 +12,7 @@ import (
 type TicketRepository struct {
 }
 
-func NewTicketRepository() *TicketRepository {
+func (a *TicketRepository) New() *TicketRepository {
 	return &TicketRepository{}
 }
 
@@ -93,10 +93,11 @@ func (a *TicketRepository) GetAll() (*[]domain.Ticket, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&tickets)
 
-	//checkTicketExist := db.Debug().Find(&tickets)
-	//if checkTicketExist.RowsAffected <= 0 {
-		//return &tickets, errors.New(strconv.Itoa(http.StatusNotFound))
-	//}
+	checkTicketExist := db.Debug().Find(&tickets)
+
+	if checkTicketExist.RowsAffected <= 0 {
+		return &tickets, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
 
 	tx := db.Debug().Find(&tickets)
 

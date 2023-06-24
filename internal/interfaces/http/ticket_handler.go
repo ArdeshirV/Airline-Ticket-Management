@@ -21,8 +21,7 @@ func TicketRoute(e *echo.Echo) {
 func ticketHandler(ctx echo.Context) error {
 	ticketid := ctx.QueryParam(ParamTicketID)
 	if ticketid == "" {
-		errMsg := fmt.Errorf("the '%s' parameter is required", ParamTicketID)
-		return echoErrorAsJSON(ctx, http.StatusBadRequest, errMsg)
+		return echoStringAsJSON(ctx, http.StatusBadRequest, "the 'Ticketid' parameter is required")
 	}
 	id, err := strconv.ParseInt(ticketid, 10, 64)
 	if err != nil {
