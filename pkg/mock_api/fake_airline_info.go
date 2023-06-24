@@ -10,22 +10,23 @@ import (
 	"time"
 	"net/http"
 
+	"github.com/the-go-dragons/final-project/pkg/config"
 	models "github.com/the-go-dragons/final-project/internal/domain"
 )
 
 type command string
 
 const (
-	APICities           = "http://localhost:3000/cities"
-	APIAirplanes        = "http://localhost:3000/airplanes"
-	APIDepartureDates   = "http://localhost:3000/departure_dates"
-	APIFlights          = "http://localhost:3000/flights"
-	APIFlightByFlightNo = "http://localhost:3000/flights?flightno=%s"
-	APIFlightsFromA2B   = "http://localhost:3000/flights?city_a=%s&city_b=%s&time=%s"
+	APICities           = "http://localhost:%d/cities"
+	APIAirplanes        = "http://localhost:%d/airplanes"
+	APIDepartureDates   = "http://localhost:%d/departure_dates"
+	APIFlights          = "http://localhost:%d/flights"
+	APIFlightByFlightNo = "http://localhost:%d/flights?flightno=%s"
+	APIFlightsFromA2B   = "http://localhost:%d/flights?city_a=%s&city_b=%s&time=%s"
 
 	CommandReturn    command = "return"
 	CommandReserve   command = "reserve"
-	APIFlightReserve         = "http://localhost:3000/reserve_flight?flightno=%s&command=%s"
+	APIFlightReserve         = "http://localhost:%d/reserve_flight?flightno=%s&command=%s"
 )
 
 type ReserveResponse struct {
@@ -37,7 +38,7 @@ type ReserveResponse struct {
 
 func SetRemainingCapacity(flightNo string, cmd command) (resp *ReserveResponse, err error) {
 	data := resp
-	api := fmt.Sprintf(APIFlightReserve, flightNo, string(cmd))
+	api := fmt.Sprintf(APIFlightReserve, config.Config.Mock.Port, flightNo, string(cmd))
 	api = strings.Replace(api, " ", "%20", len(api))
 	JSONResponse, err := ReadJSONFromAPIwithPOST(api, nil)
 	if err != nil {
@@ -52,7 +53,7 @@ func SetRemainingCapacity(flightNo string, cmd command) (resp *ReserveResponse, 
 
 func GetFlightsFromA2B(timeD, cityA, cityB string) (flights []models.Flight, err error) {
 	data := &flights
-	api := fmt.Sprintf(APIFlightsFromA2B, cityA, cityB, timeD)
+	api := fmt.Sprintf(APIFlightsFromA2B, config.Config.Mock.Port, cityA, cityB, timeD)
 	api = strings.Replace(api, " ", "%20", len(api))
 	JSONResponse, err := ReadJSONFromAPIwithGET(api)
 	if err != nil {
@@ -67,7 +68,7 @@ func GetFlightsFromA2B(timeD, cityA, cityB string) (flights []models.Flight, err
 
 func GetFlightsByFlightNo(flightNo string) (flight []models.Flight, err error) {
 	data := &flight
-	api := fmt.Sprintf(APIFlightByFlightNo, flightNo)
+	api := fmt.Sprintf(APIFlightByFlightNo, config.Config.Mock.Port, flightNo)
 	api = strings.Replace(api, " ", "%20", len(api))
 	JSONResponse, err := ReadJSONFromAPIwithGET(api)
 	if err != nil {
@@ -82,7 +83,7 @@ func GetFlightsByFlightNo(flightNo string) (flight []models.Flight, err error) {
 
 func GetAirplanes() (airplanes []models.Airplane, err error) {
 	data := &airplanes
-	api := APIAirplanes
+	api := fmt.Sprintf(APIAirplanes, config.Config.Mock.Port)
 	JSONResponse, err := ReadJSONFromAPIwithGET(api)
 	if err != nil {
 		log.Fatalln(err)
@@ -96,7 +97,7 @@ func GetAirplanes() (airplanes []models.Airplane, err error) {
 
 func GetFlights() (flights []models.Flight, err error) {
 	data := &flights
-	api := APIFlights
+	api := fmt.Sprintf(APIFlights, config.Config.Mock.Port)
 	JSONResponse, err := ReadJSONFromAPIwithGET(api)
 	if err != nil {
 		log.Fatalln(err)
@@ -110,7 +111,7 @@ func GetFlights() (flights []models.Flight, err error) {
 
 func GetCities() (cities []models.City, err error) {
 	data := &cities
-	api := APICities
+	api := fmt.Sprintf(APICities, config.Config.Mock.Port)
 	JSONResponse, err := ReadJSONFromAPIwithGET(api)
 	if err != nil {
 		log.Fatalln(err)
@@ -124,7 +125,7 @@ func GetCities() (cities []models.City, err error) {
 
 func GetDepartureDates() (times []time.Time, err error) {
 	data := &times
-	api := APIDepartureDates
+	api := fmt.Sprintf(APIDepartureDates, config.Config.Mock.Port)
 	JSONResponse, err := ReadJSONFromAPIwithGET(api)
 	if err != nil {
 		log.Fatalln(err)
@@ -168,8 +169,4 @@ func ReadJSONFromAPIwithPOST(api string, data interface{}) (string, error) {
 
 func Normalize(text string) string {
 	return strings.ToLower(strings.TrimSpace(text))
-}
-
-func AreDatesEqual(a, b time.Time) bool {
-	return a.Day() == b.Day() && a.Month() == b.Month() && a.Year() == b.Year()
 }
