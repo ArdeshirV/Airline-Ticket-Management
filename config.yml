@@ -1,7 +1,7 @@
 server:
   port: 8080
 mock:
-  port: 3000  
+  port: 3000
 database:
   name: gormDb2
   user: admin
@@ -22,8 +22,6 @@ jwt:
 encryption:
   secret:
     key: Wdn29o32sxQAS2qsQmjs23dx8s
-reserved:
-  parameter: empty
 payment:
   redirect:
     url: http://localhost:8080/payment/callback
@@ -35,3 +33,8 @@ payment:
         token: https://sandbox.banktest.ir/saderat/sepehr.shaparak.ir/V1/PeymentApi/GetToken
         payment: https://sandbox.banktest.ir/saderat/sepehr.shaparak.ir/Pay
         verify: https://sandbox.banktest.ir/saderat/sepehr.shaparak.ir/V1/PeymentApi/Advice
+app:
+  reserved: empty
+  debugMode: true
+  imageLogo: img/go-dragon.png
+  ticketFileName: pdf/ticket.pdf
