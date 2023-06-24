@@ -55,9 +55,6 @@ type Configuration struct {
 			Key string
 		}
 	}
-	Reserved struct {
-		Parameter string
-	}
 	Payment struct {
 		Redirect struct {
 			Url string
@@ -74,6 +71,12 @@ type Configuration struct {
 				}
 			}
 		}
+	}
+	App struct {
+		reserved string
+		debugMode bool
+		imageLogo string
+		ticketFileName string
 	}
 }
 
