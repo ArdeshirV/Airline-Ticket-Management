@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	config.Load()
 	database.CreateDBConnection()
 	err := database.AutoMigrateDB()
 	if err != nil {
