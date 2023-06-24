@@ -121,3 +121,15 @@ func (a *TicketRepository) Delete(id int) error {
 	}
 	return nil
 }
+
+func (a *TicketRepository) CreateList(input *[]domain.Ticket) (*[]domain.Ticket, error) {
+	db, _ := database.GetDatabaseConnection()
+
+	tx := db.Debug().Create(&input)
+
+	if tx.Error != nil {
+		return input, tx.Error
+	}
+
+	return input, nil
+}

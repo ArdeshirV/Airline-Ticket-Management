@@ -12,7 +12,7 @@ import (
 type PassengerRepository struct {
 }
 
-func (a *PassengerRepository) New() *PassengerRepository {
+func NewPassengerRepository() *PassengerRepository {
 	return &PassengerRepository{}
 }
 
@@ -110,6 +110,14 @@ func (a *PassengerRepository) GetAll() (*[]domain.Passenger, error) {
 	}
 
 	return &passengers, nil
+}
+
+func (a *PassengerRepository) GetList(IDs []int) ([]domain.Passenger, error) {
+	var passengers []domain.Passenger
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&passengers)
+	db.Find(&passengers, IDs)
+	return passengers, nil
 }
 
 func (a *PassengerRepository) Delete(id int) error {
