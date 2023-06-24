@@ -73,10 +73,10 @@ type Configuration struct {
 		}
 	}
 	App struct {
-		reserved string
-		debugMode bool
-		imageLogo string
-		ticketFileName string
+		Reserved string
+		DebugMode bool
+		ImageLogo string
+		TicketFileName string
 	}
 }
 
