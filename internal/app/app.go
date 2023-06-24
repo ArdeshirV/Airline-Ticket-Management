@@ -69,6 +69,7 @@ func routing(e *echo.Echo) {
 
 	// public routing
 	handlers.RootRoute(e)
+	handlers.TicketRoute(e)
 	handlers.FlightsRoute(e)
 
 	e.POST("/signup", UserHandler.Signup)

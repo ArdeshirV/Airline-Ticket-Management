@@ -74,7 +74,6 @@ func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
 	db = db.Model(&ticket)
 
 	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", id)
-
 	if checkTicketExist.RowsAffected <= 0 {
 		return &ticket, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
@@ -94,6 +93,7 @@ func (a *TicketRepository) GetAll() (*[]domain.Ticket, error) {
 	db = db.Model(&tickets)
 
 	//checkTicketExist := db.Debug().Find(&tickets)
+
 	//if checkTicketExist.RowsAffected <= 0 {
 		//return &tickets, errors.New(strconv.Itoa(http.StatusNotFound))
 	//}

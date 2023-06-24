@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"errors"
 	"github.com/the-go-dragons/final-project/pkg/pdf"
+	"github.com/the-go-dragons/final-project/pkg/config"
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
-)
-
-const (
-	imageLogo = "img/go-dragon.png"  // TODO: Put it in env & config file
 )
 
 func CreateTicketAsPDF(id int, TicketFileName string) error {
@@ -17,7 +14,7 @@ func CreateTicketAsPDF(id int, TicketFileName string) error {
 	if err != nil {
 		return err
 	}
-	return pdf.CreatePDF(TicketFileName, title, imageLogo, data)
+	return pdf.CreatePDF(TicketFileName, title, config.Config.App.ImageLogo, data)
 }
 
 func GetTicketData(id int) (title string, contents [][]string, err error) {
