@@ -5,4 +5,4 @@ import (
 	_ "github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 )
 
-// TODO: Move the logic of "/flights" end-point here
+// TODO: Move the logic of '/flights' end-point here
