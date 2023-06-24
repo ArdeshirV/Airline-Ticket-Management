@@ -1,0 +1,37 @@
+server:
+  port: 8080
+mock:
+  port: 3000  
+database:
+  name: gormDb2
+  user: admin
+  password: admin
+  host: localhost
+  port: 54320
+  ssl: disable
+  timezone: Asia/Tehran
+pgadmin:
+  mail: admin@example.com
+  pw: admin
+jwt:
+  token:
+    expire:
+      hours: 1
+    secret:
+      key: S2jd2el2d92lSAm2wso272Als
+encryption:
+  secret:
+    key: Wdn29o32sxQAS2qsQmjs23dx8s
+reserved:
+  parameter: empty
+payment:
+  redirect:
+    url: http://localhost:8080/payment/callback
+  gateways:
+    saderat:
+      terminal:
+        id: 134754392
+      urls:
+        token: https://sandbox.banktest.ir/saderat/sepehr.shaparak.ir/V1/PeymentApi/GetToken
+        payment: https://sandbox.banktest.ir/saderat/sepehr.shaparak.ir/Pay
+        verify: https://sandbox.banktest.ir/saderat/sepehr.shaparak.ir/V1/PeymentApi/Advice
