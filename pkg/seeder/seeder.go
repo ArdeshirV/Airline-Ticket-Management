@@ -12,6 +12,7 @@ func Run() {
 	fmt.Print("Seeder runner started")
 	userRepository := persistence.NewUserRepository()
 	roleRepository := persistence.NewRoleRepository()
+	ticketRepository := persistence.NewTicketRepository()
 
 	_, err := roleRepository.GetByName("user")
 
@@ -41,7 +42,7 @@ func Run() {
 		}
 	}
 
-	_, err = userRepository.GetByEmail("admin@gmail.com")
+	user, err := userRepository.GetByEmail("admin@gmail.com")
 
 	if err != nil {
 		role, _ := roleRepository.GetByName("user")
@@ -51,12 +52,15 @@ func Run() {
 		)
 		hashedPassword := string(encryptedPassword)
 
+		passengers := make([]domain.Passenger, 0)
+
 		newUser := domain.User{
-			Email:    "admin@gmail.com", // TODO should read from db
-			Username: "admin",           // TODO should read from db
-			Password: hashedPassword,
-			Phone:    "09035193426", // TODO should read from db
-			RoleID:   role.ID,
+			Email:      "admin@gmail.com", // TODO should read from db
+			Username:   "admin",           // TODO should read from db
+			Password:   hashedPassword,
+			Phone:      "09035193426", // TODO should read from db
+			RoleID:     role.ID,
+			Passengers: passengers,
 		}
 
 		_, err := userRepository.Create(&newUser)
@@ -65,6 +69,20 @@ func Run() {
 			fmt.Printf("could not run seeder: %v\n", err)
 		}
 	}
+
+	_, err = ticketRepository.GetByUserId(uint(user.ID))
+	if err != nil {
+		newTicket := domain.Ticket{
+			User:   *user,
+			UserID: uint(user.ID),
+		}
+
+		_, err = ticketRepository.Create(&newTicket)
+		if err != nil {
+			fmt.Printf("could not run seeder: %v\n", err)
+		}
+	}
+
 	fmt.Print("Seeder finished successfully")
 
 }

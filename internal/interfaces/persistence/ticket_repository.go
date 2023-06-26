@@ -116,18 +116,19 @@ func (a *TicketRepository) CreateList(input *[]domain.Ticket) (*[]domain.Ticket,
 }
 
 func (a *TicketRepository) GetByUserId(userId uint) (*[]domain.Ticket, error) {
-	var tickets []domain.Ticket
+	tickets := make([]domain.Ticket, 0)
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&tickets)
 
-	err := db.Table("tickets").
-		Select("*").InnerJoins("inner join flights on tickets.FlightID = flights.ID").
-		Where(&tickets, "UserID = ?", userId).
-		Where(&tickets, "Refund = ?", false).
-		Where(&tickets, "flights.DepartureTime > ?", time.Now()).
-		Scan(&tickets).Error
+	tx := db.
+		Preload("tickets").
+		Joins("join flights on tickets.FlightID = flights.ID").
+		Where("userID = ?", userId).
+		Where("Refund = ?", false).
+		Where("flights.DepartureTime > ?", time.Now()).
+		Find(&tickets)
 
-	if err != nil {
+	if tx.Error != nil {
 		return nil, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
 
@@ -139,14 +140,15 @@ func (a *TicketRepository) GetCancelledByUserId(userId uint) (*[]domain.Ticket, 
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&tickets)
 
-	err := db.Table("tickets").
-		Select("*").InnerJoins("inner join flights on tickets.FlightID = flights.ID").
-		Where(&tickets, "UserID = ?", userId).
-		Where(&tickets, "Refund = ?", true).
-		Where(&tickets, "flights.DepartureTime > ?", time.Now()).
-		Scan(&tickets).Error
+	tx := db.
+		Preload("tickets").
+		Joins("join flights on tickets.FlightID = flights.ID").
+		Where("userID = ?", userId).
+		Where("Refund = ?", true).
+		Where("flights.DepartureTime > ?", time.Now()).
+		Find(&tickets)
 
-	if err != nil {
+	if tx.Error != nil {
 		return nil, errors.New(strconv.Itoa(http.StatusNotFound))
 	}
 
