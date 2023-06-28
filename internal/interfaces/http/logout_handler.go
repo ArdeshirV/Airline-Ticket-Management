@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -23,8 +24,8 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
 
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ") // Todo: add to env
-	JwtTokenSecretConfig := config.Get(config.JwtTokenExpireHours)
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")                        // Todo: add to env
+	JwtTokenSecretConfig := fmt.Sprintf("%v", config.Config.Jwt.Token.Expire.Hours) //config.Get(config.JwtTokenExpireHours)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
 		return []byte(JwtTokenSecretConfig), nil
