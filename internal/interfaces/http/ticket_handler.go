@@ -2,9 +2,10 @@ package http
 
 import (
 	"fmt"
-	"github.com/the-go-dragons/final-project/internal/domain"
 	"net/http"
 	"strconv"
+
+	"github.com/the-go-dragons/final-project/internal/domain"
 
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/usecase"

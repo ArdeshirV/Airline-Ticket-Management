@@ -1,12 +1,13 @@
 package usecase
 
 import (
-	"fmt"
 	"errors"
-	"github.com/the-go-dragons/final-project/pkg/pdf"
-	"github.com/the-go-dragons/final-project/pkg/config"
+	"fmt"
+
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
+	"github.com/the-go-dragons/final-project/pkg/config"
+	"github.com/the-go-dragons/final-project/pkg/pdf"
 )
 
 func CreateTicketAsPDF(id int, TicketFileName string) error {
@@ -27,7 +28,7 @@ func GetTicketData(id int) (title string, contents [][]string, err error) {
 	}
 	var ticket *domain.Ticket = nil
 	if len(*tickets) == 0 {
-		ticket = createFakeTicket()  // TODO: Remove this line when database works
+		ticket = createFakeTicket() // TODO: Remove this line when database works
 	} else {
 		for _, t := range *tickets {
 			if uint(t.ID) == uint(id) {
