@@ -13,7 +13,7 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
-var redirectURL = config.Config.Payment.Redirect.Url
+var redirectURL = config.Config.Payment.RedirectUrl
 
 type Bank string
 
