@@ -23,7 +23,7 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Authoization header is not valid", Result: nil})
 	}
 
-	tokenString := strings.TrimPrefix(authHeader, config.Config.Auth.TokenPrefix + " ")
+	tokenString := strings.TrimPrefix(authHeader, config.Config.Auth.TokenPrefix+" ")
 	JwtTokenSecretConfig := fmt.Sprintf("%v", config.Config.JwtToken.ExpireHours)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature

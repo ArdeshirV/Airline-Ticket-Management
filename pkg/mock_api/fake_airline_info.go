@@ -1,17 +1,17 @@
 package mock_api
 
 import (
-	"io"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"strings"
 	"time"
-	"net/http"
 
-	"github.com/the-go-dragons/final-project/pkg/config"
 	models "github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
 type command string
