@@ -60,9 +60,16 @@ func routing(e *echo.Echo) {
 	payment := usecase.NewPayment(paymentRepo, orderRepo)
 	PaymentHandler := handlers.NewPaymentHandler(payment)
 
-	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo)
+	ticketRepo := persistence.NewTicketRepository()
+	ticketUsecase := usecase.NewTicketUsecase(ticketRepo)
+
+	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo, ticketRepo)
 
 	BookingHandler := handlers.NewBookingHandler(booking)
+
+	flightUseCase := usecase.NewFlightUseCase(flightRepo)
+
+	TicketHandler := handlers.NewTicketHandler(ticketUsecase, flightUseCase, booking)
 
 	// UserHandler := handlers.NewUserHandler(roleUsecase)
 	_ = RoleHandler
@@ -79,6 +86,10 @@ func routing(e *echo.Echo) {
 	e.POST("/payment/callback", PaymentHandler.Callback)
 	e.POST("/booking/book", BookingHandler.Book)
 	e.POST("/booking/finalize", BookingHandler.Finalize)
+
+	e.GET("/reserved", TicketHandler.GetReservedUsers)
+
+	//e.POST()
 
 	//e.GET("/protected", SomeProtectedRouteHandler, UserHandler.Authorize)
 

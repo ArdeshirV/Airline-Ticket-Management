@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
@@ -17,55 +18,27 @@ func NewTicketRepository() *TicketRepository {
 }
 
 func (a *TicketRepository) Create(input *domain.Ticket) (*domain.Ticket, error) {
-	var ticket domain.Ticket
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&ticket)
-
-	checkTicketExist := db.Debug().First(&ticket, "ID = ?", input.ID)
-
-	if checkTicketExist.RowsAffected > 0 {
-		return &ticket, errors.New(strconv.Itoa(http.StatusConflict))
+	if input.ID > 0 {
+		return nil, errors.New("can not create existing model")
 	}
+	db.Create(input)
 
-	ticket.Flight = input.Flight
-	ticket.Passenger = input.Passenger
-	ticket.Payment = input.Payment
-	ticket.User = input.User
-	ticket.Refund = input.Refund
-
-	addNewTicket := db.Debug().Create(&ticket).Commit()
-
-	if addNewTicket.RowsAffected < 1 {
-		return &ticket, errors.New(strconv.Itoa(http.StatusForbidden))
-	}
-
-	return &ticket, nil
+	return input, nil
 }
 
 func (a *TicketRepository) Update(input *domain.Ticket) (*domain.Ticket, error) {
-	var ticket domain.Ticket
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&ticket)
-
-	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", input.ID)
-
-	if checkTicketExist.RowsAffected <= 0 {
-		return &ticket, errors.New(strconv.Itoa(http.StatusNotFound))
+	_, err := a.Get(int(input.ID))
+	if err != nil {
+		return nil, errors.New("the model doesnt exists")
 	}
-
-	tx := checkTicketExist.Update("ID", input.ID).Update("Flight", input.Flight).Update("Passenger", input.Passenger)
-	tx = tx.Update("Payment", input.Payment).Update("User", input.User).Update("Refund", input.Refund)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	} else {
-		updateTicket := tx.Commit()
-		if updateTicket.RowsAffected < 1 {
-			return &ticket, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
+	tx := db.Where("id = ?", input.ID).Save(input)
+	if tx.Error != nil {
+		return input, tx.Error
 	}
-
-	return &ticket, nil
+	tx.Commit()
+	return input, nil
 }
 
 func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
@@ -74,11 +47,8 @@ func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
 	db = db.Model(&ticket)
 
 	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", id)
-	if checkTicketExist.RowsAffected <= 0 {
-		return &ticket, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
 
-	tx := checkTicketExist.Find(&ticket)
+	tx := checkTicketExist.First(&ticket)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -91,12 +61,6 @@ func (a *TicketRepository) GetAll() (*[]domain.Ticket, error) {
 	var tickets []domain.Ticket
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&tickets)
-
-	//checkTicketExist := db.Debug().Find(&tickets)
-
-	//if checkTicketExist.RowsAffected <= 0 {
-		//return &tickets, errors.New(strconv.Itoa(http.StatusNotFound))
-	//}
 
 	tx := db.Debug().Find(&tickets)
 
@@ -121,6 +85,24 @@ func (a *TicketRepository) Delete(id int) error {
 	return nil
 }
 
+func (a *TicketRepository) GetAllNotArrivedByUserId() (*[]domain.Ticket, error) {
+	var tickets []domain.Ticket
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&tickets)
+
+	err := db.Table("tickets").
+		Select("*").InnerJoins("inner join flights on tickets.FlightID = flights.ID").
+		Where(&tickets, "Refund = ?", false).
+		Where(&tickets, "flights.DepartureTime > ?", time.Now()).
+		Scan(&tickets).Error
+
+	if err != nil {
+		return nil, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	return &tickets, nil
+}
+
 func (a *TicketRepository) CreateList(input *[]domain.Ticket) (*[]domain.Ticket, error) {
 	db, _ := database.GetDatabaseConnection()
 
@@ -131,4 +113,61 @@ func (a *TicketRepository) CreateList(input *[]domain.Ticket) (*[]domain.Ticket,
 	}
 
 	return input, nil
+}
+
+func (a *TicketRepository) GetByUserId(userId uint) (*[]domain.Ticket, error) {
+	tickets := make([]domain.Ticket, 0)
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&tickets)
+
+	tx := db.
+		Preload("tickets").
+		Joins("join flights on tickets.FlightID = flights.ID").
+		Where("userID = ?", userId).
+		Where("Refund = ?", false).
+		Where("flights.DepartureTime > ?", time.Now()).
+		Find(&tickets)
+
+	if tx.Error != nil {
+		return nil, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	return &tickets, nil
+}
+
+func (a *TicketRepository) GetCancelledByUserId(userId uint) (*[]domain.Ticket, error) {
+	var tickets []domain.Ticket
+	db, _ := database.GetDatabaseConnection()
+	db = db.Model(&tickets)
+
+	tx := db.
+		Preload("tickets").
+		Joins("join flights on tickets.FlightID = flights.ID").
+		Where("userID = ?", userId).
+		Where("Refund = ?", true).
+		Where("flights.DepartureTime > ?", time.Now()).
+		Find(&tickets)
+
+	if tx.Error != nil {
+		return nil, errors.New(strconv.Itoa(http.StatusNotFound))
+	}
+
+	return &tickets, nil
+}
+
+func (a *TicketRepository) CancelTicket(id int) (*domain.Ticket, error) {
+	ticket, err := a.Get(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ticket.Refund = true
+
+	ticket, err = a.Update(ticket)
+	if err != nil {
+		return nil, err
+	}
+
+	return ticket, nil
 }

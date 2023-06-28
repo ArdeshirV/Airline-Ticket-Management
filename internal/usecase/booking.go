@@ -16,11 +16,13 @@ type Booking struct {
 
 func NewBooking(flightRepo *persistence.FlightRepository,
 	passengerRepo *persistence.PassengerRepository,
-	orderRepo *persistence.OrderRepository) *Booking {
+	orderRepo *persistence.OrderRepository,
+	ticketRepo *persistence.TicketRepository) *Booking {
 	return &Booking{
 		flightRepo:    flightRepo,
 		passengerRepo: passengerRepo,
 		orderRepo:     orderRepo,
+		ticketRepo:    ticketRepo,
 	}
 }
 
