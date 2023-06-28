@@ -22,7 +22,7 @@ func echoStringAsJSON(ctx echo.Context, status int, msg string) error {
 }
 
 func echoJSON(ctx echo.Context, status int, data interface{}) error {
-	if config.IsDebugModeEnabled() {
+	if config.IsDebugMode() {
 		return ctx.JSONPretty(status, data, "    ")
 	} else {
 		return ctx.JSON(status, data)

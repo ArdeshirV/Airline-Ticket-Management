@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -13,7 +14,7 @@ import (
 
 var (
 	store  = sessions.NewCookieStore()
-	secret = config.Get(config.JwtTokenExpireHours)
+	secret = config.Config.Jwt.Token.Expire.Hours // config.Get(config.JwtTokenExpireHours)
 )
 
 type App struct {
@@ -98,7 +99,7 @@ func routing(e *echo.Echo) {
 }
 
 func initializeSessionStore() {
-	store = sessions.NewCookieStore([]byte(secret))
+	store = sessions.NewCookieStore([]byte(fmt.Sprintf("%v", secret)))
 
 	// Set session options
 	store.Options = &sessions.Options{

@@ -175,7 +175,7 @@ func flightsHandler(ctx echo.Context) error {
 		return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 	}
 
-	if config.IsDebugModeEnabled() {
+	if config.IsDebugMode() {
 		fmt.Printf("ParamSortPrice: %v\n\n", ParamSortPrice)
 	}
 

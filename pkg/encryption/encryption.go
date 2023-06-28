@@ -13,7 +13,8 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
-var key = []byte(config.Get(config.EncryptionSecretKey))
+//var key = []byte(config.Get(config.EncryptionSecretKey))
+var key = []byte(config.Config.Encryption.Secret.Key)
 
 func Encrypt(plaintext interface{}) (string, error) {
 	// Convert the plaintext to a byte array

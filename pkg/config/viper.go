@@ -1,32 +1,13 @@
 package config
 
 import (
+	"os"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/spf13/viper"
 )
-
-var Config *Configuration
-
-func init() {
-	Load()
-}
-
-func Load() {
-	if Config == nil {
-		load()
-	}
-}
-
-func load() {
-	conf, err := loadConfiguration(".", "config", "yml")
-	if err != nil {
-		log.Fatal("Loading viper config faild")
-	}
-	Config = conf
-}
 
 type Configuration struct {
 	Server struct {
@@ -90,6 +71,51 @@ type Configuration struct {
 	}
 }
 
+var Config *Configuration
+
+func IsTestMode() {
+	if testModeEnabled {
+		fmt.Println("run under go test")
+	} else {
+		fmt.Println("normal run")
+	}
+}
+
+func IsDebugMode() bool {
+	return Config.App.DebugMode
+}
+
+func Load() {
+	if Config == nil {
+		load()
+	}
+}
+//----------------------------------------------------------------------------------------
+var (
+	testModeEnabled bool
+)
+
+func init() {
+	Load()
+}
+
+func load() {
+	var err error
+	var conf *Configuration
+	testModeEnabled = strings.HasSuffix(os.Args[0], ".test")
+	if testModeEnabled {
+		address := os.Getenv("PWD")
+		fmt.Println("  XX:", address)
+		conf, err = loadConfiguration(address, "config", "yml")
+	} else {
+		conf, err = loadConfiguration(".", "config", "yml")
+	}
+	if err != nil {
+		log.Fatal("Loading viper config faild")
+	}
+	Config = conf
+}
+
 func loadConfiguration(configPath, configName, ConfigType string) (*Configuration, error) {
 	var config *Configuration
 
@@ -113,8 +139,4 @@ func loadConfiguration(configPath, configName, ConfigType string) (*Configuratio
 	}
 
 	return config, nil
-}
-
-func IsDebugModeEnabled() bool {
-	return Config.App.DebugMode
 }
