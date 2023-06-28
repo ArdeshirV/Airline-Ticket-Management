@@ -108,3 +108,14 @@ func (a *FlightRepository) Delete(id int) error {
 	}
 	return nil
 }
+
+func (a *FlightRepository) IncreaseFlightCapacity(flight *domain.Flight) error {
+	flight.RemainingCapacity = flight.RemainingCapacity + 1
+	_, err := a.Update(flight)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

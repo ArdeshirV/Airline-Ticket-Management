@@ -7,6 +7,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/sessions v1.2.1
+	github.com/johnfercher/maroto v0.42.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/spf13/viper v1.16.0
 	golang.org/x/crypto v0.10.0
@@ -27,7 +28,6 @@ require (
 	github.com/jackc/pgx/v5 v5.4.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/johnfercher/maroto v0.42.0 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/lib/pq v1.10.2 // indirect
