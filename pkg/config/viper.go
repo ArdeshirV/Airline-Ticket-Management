@@ -1,9 +1,10 @@
 package config
 
 import (
-	"os"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -33,14 +34,14 @@ type Configuration struct {
 	}
 	JwtToken struct {
 		ExpireHours int
-		SecretKey string
+		SecretKey   string
 	}
 	Encryption struct {
 		SecretKey string
 	}
 	Payment struct {
 		RedirectUrl string
-		Gateways struct {
+		Gateways    struct {
 			Saderat struct {
 				Terminal struct {
 					Id string
@@ -54,14 +55,14 @@ type Configuration struct {
 		}
 	}
 	App struct {
-		Reserved string
-		DebugMode bool
-		ImageLogo string
+		Reserved       string
+		DebugMode      bool
+		ImageLogo      string
 		TicketFileName string
 	}
 	Auth struct {
 		RequestLogoutHeader string
-		TokenPrefix string
+		TokenPrefix         string
 	}
 }
 
@@ -84,7 +85,8 @@ func Load() {
 		load()
 	}
 }
-//----------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------------------
 var (
 	testModeEnabled bool
 )
@@ -98,8 +100,11 @@ func load() {
 	var conf *Configuration
 	testModeEnabled = strings.HasSuffix(os.Args[0], ".test")
 	if testModeEnabled {
+		// The 'APP_ROOT' env-variable is defined in makefile and used by: 'make test'
 		address := os.Getenv("APP_ROOT")
-		fmt.Println("  XX:", address)
+		if address == "" {
+			panic(errors.New("the APP_ROOT environment variable is not defined, please use 'make test' instead of 'go test ./...'"))
+		}
 		conf, err = loadConfiguration(address, "config", "yml")
 	} else {
 		conf, err = loadConfiguration(".", "config", "yml")

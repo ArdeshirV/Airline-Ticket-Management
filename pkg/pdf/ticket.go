@@ -1,20 +1,24 @@
 package pdf
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
-	"github.com/johnfercher/maroto/pkg/pdf"
 	"github.com/johnfercher/maroto/pkg/color"
-	"github.com/johnfercher/maroto/pkg/props"
 	"github.com/johnfercher/maroto/pkg/consts"
+	"github.com/johnfercher/maroto/pkg/pdf"
+	"github.com/johnfercher/maroto/pkg/props"
 )
 
 func CreatePDF(pdfFileName, heading string, logo string, data [][]string) error {
 	maroto := pdf.NewMaroto(consts.Portrait, consts.A4)
 	maroto.SetPageMargins(20, 10, 20)
-	if err := buildHeading(maroto, heading, logo); err != nil { return err }
-	if err := buildTicketDataList(maroto, data); err != nil { return err }
+	if err := buildHeading(maroto, heading, logo); err != nil {
+		return err
+	}
+	if err := buildTicketDataList(maroto, data); err != nil {
+		return err
+	}
 	if err := maroto.OutputFileAndClose(pdfFileName); err != nil {
 		return errors.New("failed to save the ticket as PDF file")
 	}
@@ -36,14 +40,14 @@ func buildHeading(m pdf.Maroto, heading string, imageLogo string) (err error) {
 		return errors.New(fmt.Sprintf("failed to load '%s' image in PDF", imageLogo))
 	}
 	m.Row(20, func() {
-			m.Col(12, func() {
-				m.QrCode(heading, props.Rect{
-					Left:    0,
-					Top:     5,
-					Center:  true,
-					Percent: 200,
-				})
+		m.Col(12, func() {
+			m.QrCode(heading, props.Rect{
+				Left:    0,
+				Top:     5,
+				Center:  true,
+				Percent: 200,
 			})
+		})
 	})
 	m.Row(10, func() {
 		m.Col(12, func() {
