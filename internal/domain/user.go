@@ -13,6 +13,6 @@ type User struct {
 	CreatedAt       time.Time   `json:"createdat"`
 	RoleID          uint        `json:"roleid"`
 	Role            Role        `json:"role"`
-	Passengers      []Passenger `json:"passengers"`
+	Passengers      []Passenger `json:"passengers" gorm:"foreignKey:UserID"`
 	IsLoginRequired bool        `json:"isloginrequired" gorm:"default:false"`
 }
