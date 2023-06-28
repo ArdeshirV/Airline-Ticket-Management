@@ -3,11 +3,11 @@ server:
 mock:
   port: 3000
 database:
-  name: gormDb2
-  user: admin
-  password: admin
-  host: localhost
-  port: 54320
+  name: gormdb2
+  user: root
+  password: PSUliSks8J3QPrDuGIx9egwo
+  host: luca.iran.liara.ir
+  port: 31835
   ssl: disable
   timezone: Asia/Tehran
 pgadmin:

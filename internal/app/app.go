@@ -14,7 +14,7 @@ import (
 
 var (
 	store  = sessions.NewCookieStore()
-	secret = config.Config.Jwt.Token.Expire.Hours // config.Get(config.JwtTokenExpireHours)
+	secret = config.Config.JwtToken.ExpireHours
 )
 
 type App struct {

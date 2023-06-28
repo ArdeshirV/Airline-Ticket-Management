@@ -31,25 +31,15 @@ type Configuration struct {
 		Mail string
 		Pw   string
 	}
-	Jwt struct {
-		Token struct {
-			Expire struct {
-				Hours int
-			}
-			Secret struct {
-				Key string
-			}
-		}
+	JwtToken struct {
+		ExpireHours int
+		SecretKey string
 	}
 	Encryption struct {
-		Secret struct {
-			Key string
-		}
+		SecretKey string
 	}
 	Payment struct {
-		Redirect struct {
-			Url string
-		}
+		RedirectUrl string
 		Gateways struct {
 			Saderat struct {
 				Terminal struct {
@@ -68,6 +58,10 @@ type Configuration struct {
 		DebugMode bool
 		ImageLogo string
 		TicketFileName string
+	}
+	Auth struct {
+		RequestLogoutHeader string
+		TokenPrefix string
 	}
 }
 
@@ -104,7 +98,7 @@ func load() {
 	var conf *Configuration
 	testModeEnabled = strings.HasSuffix(os.Args[0], ".test")
 	if testModeEnabled {
-		address := os.Getenv("PWD")
+		address := os.Getenv("APP_ROOT")
 		fmt.Println("  XX:", address)
 		conf, err = loadConfiguration(address, "config", "yml")
 	} else {
