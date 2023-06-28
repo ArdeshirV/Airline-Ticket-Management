@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -34,10 +33,10 @@ type LoginHandler struct {
 }
 
 func GenerateToken(user *domain.User) (string, error) {
-	expirationHoursCofig := config.Get(config.JwtTokenExpireHours)
-	JwtTokenSecretConfig := config.Get(config.JwtTokenSecretKey)
+	expirationHoursCofig := config.Config.Jwt.Token.Expire.Hours //config.Get(config.JwtTokenExpireHours)
+	JwtTokenSecretConfig := config.Config.Jwt.Token.Secret       //config.Get(config.JwtTokenSecretKey)
 
-	expirationCofigHoursValue, _ := strconv.ParseUint(expirationHoursCofig, 10, 64)
+	expirationCofigHoursValue := expirationHoursCofig //strconv.ParseUint(expirationHoursCofig, 10, 64)
 	uintExpirationCofigHoursValue := uint(expirationCofigHoursValue)
 
 	duration := time.Duration(uintExpirationCofigHoursValue) * time.Hour
@@ -48,7 +47,7 @@ func GenerateToken(user *domain.User) (string, error) {
 		"exp":    expirationTime.Unix(),
 	})
 
-	secretKey := []byte(JwtTokenSecretConfig)
+	secretKey := []byte(JwtTokenSecretConfig.Key) // TODO: Check this code
 	tokenString, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", err
