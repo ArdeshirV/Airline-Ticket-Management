@@ -99,15 +99,19 @@ func load() {
 	var err error
 	var conf *Configuration
 	testModeEnabled = strings.HasSuffix(os.Args[0], ".test")
+	appConfigFileName := os.Getenv("APP_CONFIG")
+	if appConfigFileName == "" {
+		appConfigFileName = "config-docker"
+	}
 	if testModeEnabled {
 		// The 'APP_ROOT' env-variable is defined in makefile and used by: 'make test'
 		address := os.Getenv("APP_ROOT")
 		if address == "" {
 			panic(errors.New("the APP_ROOT environment variable is not defined, please use 'make test' instead of 'go test ./...'"))
 		}
-		conf, err = loadConfiguration(address, "config", "yml")
+		conf, err = loadConfiguration(address, appConfigFileName, "yml")
 	} else {
-		conf, err = loadConfiguration(".", "config", "yml")
+		conf, err = loadConfiguration(".", appConfigFileName, "yml")
 	}
 	if err != nil {
 		log.Fatal("Loading viper config faild")

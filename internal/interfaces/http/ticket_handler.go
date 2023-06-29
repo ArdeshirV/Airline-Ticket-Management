@@ -1,19 +1,12 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
-
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/usecase"
-	"github.com/the-go-dragons/final-project/pkg/config"
-)
-
-const (
-	ParamTicketID = "ticketid"
 )
 
 type TicketActionRequest struct {
@@ -35,28 +28,6 @@ func NewTicketHandler(ticketUseCase *usecase.TicketUsecase, flightUseCase *useca
 		flightUseCase: flightUseCase,
 		booking:       booking,
 	}
-}
-
-func TicketRoute(e *echo.Echo) {
-	e.GET("/ticket", ticketHandler)
-}
-
-func ticketHandler(ctx echo.Context) error {
-	ticketid := ctx.QueryParam(ParamTicketID)
-	if ticketid == "" {
-		return echoStringAsJSON(ctx, http.StatusBadRequest, "the 'Ticketid' parameter is required")
-	}
-	id, err := strconv.Atoi(ticketid)
-	if err != nil {
-		errMsg := fmt.Errorf("failed to convert ticketid='%v' to integer", ticketid)
-		return echoErrorAsJSON(ctx, http.StatusBadRequest, errMsg)
-	}
-	err = usecase.CreateTicketAsPDF(int(id), config.Config.App.TicketFileName)
-	if err != nil {
-		errMsg := fmt.Errorf("%v", err)
-		return echoErrorAsJSON(ctx, http.StatusBadRequest, errMsg)
-	}
-	return ctx.File(config.Config.App.TicketFileName)
 }
 
 func (th *TicketHandler) Cancel(c echo.Context) error {
