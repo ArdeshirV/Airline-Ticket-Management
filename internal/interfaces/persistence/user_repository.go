@@ -76,11 +76,7 @@ func (ur *UserRepository) Get(id int) (*domain.User, error) {
 
 	checkUserExist := db.Debug().Where(&user, "ID = ?", id)
 
-	if checkUserExist.RowsAffected <= 0 {
-		return &user, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
-	tx := checkUserExist.Find(&user)
+	tx := checkUserExist.First(&user)
 
 	if err := tx.Error; err != nil {
 		return nil, err
