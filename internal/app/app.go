@@ -65,11 +65,8 @@ func routing(e *echo.Echo) {
 	ticketUsecase := usecase.NewTicketUsecase(ticketRepo)
 
 	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo, ticketRepo)
-
 	BookingHandler := handlers.NewBookingHandler(booking)
-
 	flightUseCase := usecase.NewFlightUseCase(flightRepo)
-
 	TicketHandler := handlers.NewTicketHandler(ticketUsecase, flightUseCase, booking)
 
 	// UserHandler := handlers.NewUserHandler(roleUsecase)
@@ -77,8 +74,8 @@ func routing(e *echo.Echo) {
 
 	// public routing
 	handlers.RootRoute(e)
-	handlers.TicketRoute(e)
 	handlers.FlightsRoute(e)
+	handlers.PrintTicketRoute(e)
 
 	e.POST("/signup", UserHandler.Signup)
 	e.POST("/login", UserHandler.Login)
