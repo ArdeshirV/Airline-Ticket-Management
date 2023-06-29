@@ -75,6 +75,7 @@ func routing(e *echo.Echo) {
 	// public routing
 	handlers.RootRoute(e)
 	handlers.FlightsRoute(e)
+	handlers.PassengerRoute(e)
 	handlers.PrintTicketRoute(e)
 
 	e.POST("/signup", UserHandler.Signup)
@@ -111,9 +112,3 @@ func SessionMiddleware() echo.MiddlewareFunc {
 		}
 	}
 }
-
-/*func SomeProtectedRouteHandler(c echo.Context) error {
-	println("salam")
-
-	return nil
-}*/
