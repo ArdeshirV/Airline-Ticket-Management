@@ -13,6 +13,7 @@ func Run() {
 	userRepository := persistence.NewUserRepository()
 	roleRepository := persistence.NewRoleRepository()
 	ticketRepository := persistence.NewTicketRepository()
+	flightRepository := persistence.NewFlightRepository()
 
 	_, err := roleRepository.GetByName("user")
 
@@ -72,9 +73,19 @@ func Run() {
 
 	_, err = ticketRepository.GetByUserId(uint(user.ID))
 	if err != nil {
+		newflight, err := flightRepository.Create(&domain.Flight{
+			FlightNo:          "10",
+			RemainingCapacity: 10,
+		})
+		if err != nil {
+			fmt.Printf("could not run seeder: %v\n", err)
+		}
+
 		newTicket := domain.Ticket{
-			User:   *user,
-			UserID: uint(user.ID),
+			User:     *user,
+			UserID:   uint(user.ID),
+			Flight:   *newflight,
+			FlightID: newflight.ID,
 		}
 
 		_, err = ticketRepository.Create(&newTicket)
