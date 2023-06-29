@@ -23,5 +23,5 @@ fmt:
 clean:
 	rm -f ./$(APP_NAME)
 
-# Docker
-
+docker:
+	docker-compose up --build
