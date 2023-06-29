@@ -88,13 +88,7 @@ func routing(e *echo.Echo) {
 	e.POST("/booking/finalize", BookingHandler.Finalize)
 
 	e.GET("/reserved", TicketHandler.GetReservedUsers)
-
-	//e.POST()
-
-	//e.GET("/protected", SomeProtectedRouteHandler, UserHandler.Authorize)
-
-	// protected routing
-	// e.GET("/now", UserController.GetTime, middlewares.IsLoggedIn, middlewares.IsAdmin)
+	e.POST("/cancel", TicketHandler.Cancel)
 }
 
 func initializeSessionStore() {
