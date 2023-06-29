@@ -2,9 +2,6 @@ package persistence
 
 import (
 	"errors"
-	"net/http"
-	"strconv"
-
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
@@ -28,28 +25,17 @@ func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, erro
 }
 
 func (a *PaymentRepository) Update(input *domain.Payment) (*domain.Payment, error) {
-	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&payment)
-
-	checkPaymentExist := db.Debug().Where(&payment, "ID = ?", input.ID)
-
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payment, errors.New(strconv.Itoa(http.StatusNotFound))
+	_, err := a.Get(int(input.ID))
+	if err != nil {
+		return nil, errors.New("the model doesnt exists")
 	}
-
-	tx := checkPaymentExist.Update("ID", input.ID).Update("PayAmount", input.PayAmount).Update("PaymentSerial", input.PaymentSerial).Update("PayTime", input.PayTime)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	} else {
-		updatedPayment := tx.Commit()
-		if updatedPayment.RowsAffected < 1 {
-			return &payment, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
+	tx := db.Where("id = ?", input.ID).Save(input)
+	if tx.Error != nil {
+		return input, tx.Error
 	}
-
-	return &payment, nil
+	tx.Commit()
+	return input, nil
 }
 
 func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
@@ -57,13 +43,9 @@ func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
 
-	checkPaymentExist := db.Debug().Where(&payment, "ID = ?", id)
+	checkTicketExist := db.Debug().Where(&payment, "ID = ?", id)
 
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payment, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
-	tx := checkPaymentExist.Find(&payment)
+	tx := checkTicketExist.First(&payment)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -76,12 +58,6 @@ func (a *PaymentRepository) GetAll() (*[]domain.Payment, error) {
 	var payments []domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payments)
-
-	checkPaymentExist := db.Debug().Find(&payments)
-
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payments, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
 
 	tx := db.Debug().Find(&payments)
 
