@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	config.Load()
 	database.CreateDBConnection()
 	err := database.AutoMigrateDB()
 	if err != nil {
@@ -20,5 +19,5 @@ func main() {
 	}
 	app := app.NewApp()
 	seeder.Run()
-	log.Fatalln(app.Start(config.Get(config.PortMain)))
+	log.Fatalln(app.Start(fmt.Sprintf("%v", config.Config.Server.Port)))
 }

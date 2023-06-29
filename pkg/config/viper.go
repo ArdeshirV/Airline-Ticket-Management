@@ -1,32 +1,14 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
 )
-
-var Config *Configuration
-
-func init() {
-	Load()
-}
-
-func Load() {
-	if Config == nil {
-		load()
-	}
-}
-
-func load() {
-	conf, err := loadConfiguration(".", "config", "yml")
-	if err != nil {
-		log.Fatal("Loading viper config faild")
-	}
-	Config = conf
-}
 
 type Configuration struct {
 	Server struct {
@@ -50,26 +32,16 @@ type Configuration struct {
 		Mail string
 		Pw   string
 	}
-	Jwt struct {
-		Token struct {
-			Expire struct {
-				Hours int
-			}
-			Secret struct {
-				Key string
-			}
-		}
+	JwtToken struct {
+		ExpireHours int
+		SecretKey   string
 	}
 	Encryption struct {
-		Secret struct {
-			Key string
-		}
+		SecretKey string
 	}
 	Payment struct {
-		Redirect struct {
-			Url string
-		}
-		Gateways struct {
+		RedirectUrl string
+		Gateways    struct {
 			Saderat struct {
 				Terminal struct {
 					Id string
@@ -83,11 +55,64 @@ type Configuration struct {
 		}
 	}
 	App struct {
-		Reserved string
-		DebugMode bool
-		ImageLogo string
+		Reserved       string
+		DebugMode      bool
+		ImageLogo      string
 		TicketFileName string
 	}
+	Auth struct {
+		RequestLogoutHeader string
+		TokenPrefix         string
+	}
+}
+
+var Config *Configuration
+
+func IsTestMode() {
+	if testModeEnabled {
+		fmt.Println("run under go test")
+	} else {
+		fmt.Println("normal run")
+	}
+}
+
+func IsDebugMode() bool {
+	return Config.App.DebugMode
+}
+
+func Load() {
+	if Config == nil {
+		load()
+	}
+}
+
+// ----------------------------------------------------------------------------------------
+var (
+	testModeEnabled bool
+)
+
+func init() {
+	Load()
+}
+
+func load() {
+	var err error
+	var conf *Configuration
+	testModeEnabled = strings.HasSuffix(os.Args[0], ".test")
+	if testModeEnabled {
+		// The 'APP_ROOT' env-variable is defined in makefile and used by: 'make test'
+		address := os.Getenv("APP_ROOT")
+		if address == "" {
+			panic(errors.New("the APP_ROOT environment variable is not defined, please use 'make test' instead of 'go test ./...'"))
+		}
+		conf, err = loadConfiguration(address, "config", "yml")
+	} else {
+		conf, err = loadConfiguration(".", "config", "yml")
+	}
+	if err != nil {
+		log.Fatal("Loading viper config faild")
+	}
+	Config = conf
 }
 
 func loadConfiguration(configPath, configName, ConfigType string) (*Configuration, error) {
@@ -113,8 +138,4 @@ func loadConfiguration(configPath, configName, ConfigType string) (*Configuratio
 	}
 
 	return config, nil
-}
-
-func IsDebugModeEnabled() bool {
-	return Config.App.DebugMode
 }

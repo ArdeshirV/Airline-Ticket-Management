@@ -1,11 +1,12 @@
 package http
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/domain"
-	"net/http"
-	"strings"
 )
 
 func protectedEndpoint(c echo.Context) error {
