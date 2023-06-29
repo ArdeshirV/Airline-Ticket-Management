@@ -14,7 +14,7 @@ import (
 )
 
 // var key = []byte(config.Get(config.EncryptionSecretKey))
-var key = []byte(config.Config.Encryption.Secret.Key)
+var key = []byte(config.Config.Encryption.SecretKey)
 
 func Encrypt(plaintext interface{}) (string, error) {
 	// Convert the plaintext to a byte array
