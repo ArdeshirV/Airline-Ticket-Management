@@ -6,19 +6,19 @@ import (
 )
 
 type APIResponse struct {
-	message string `json: "message"`
+	Message string `json: "message"`
 }
 
 func (resp APIResponse) GetMessage() string {
-	return resp.message
+	return resp.Message
 }
 
 func echoErrorAsJSON(ctx echo.Context, status int, err error) error {
-	return echoJSON(ctx, status, APIResponse{message: err.Error()})
+	return echoJSON(ctx, status, APIResponse{Message: err.Error()})
 }
 
 func echoStringAsJSON(ctx echo.Context, status int, msg string) error {
-	return echoJSON(ctx, status, APIResponse{message: msg})
+	return echoJSON(ctx, status, APIResponse{Message: msg})
 }
 
 func echoJSON(ctx echo.Context, status int, data interface{}) error {
