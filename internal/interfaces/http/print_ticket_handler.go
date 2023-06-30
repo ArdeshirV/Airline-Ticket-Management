@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/the-go-dragons/final-project/pkg/config"
 	"github.com/the-go-dragons/final-project/internal/usecase"
+	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
 const (

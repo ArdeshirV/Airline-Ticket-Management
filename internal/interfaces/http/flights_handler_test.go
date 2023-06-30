@@ -2,9 +2,11 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -34,11 +36,23 @@ func TestFlightsHandler(t *testing.T) {
 		}
 		assert.Equal(t, len(mockFlights), len(fs))
 		if len(fs) > 0 {
-			assert.Equal(t, mockFlights[0].ID, fs[0].ID)
-			assert.Equal(t, mockFlights[0].FlightNo, fs[0].FlightNo)
+			found_index := -1
+			for index := range mockFlights {
+				if mockFlights[index].ID == fs[0].ID {
+					found_index = index
+					break
+				}
+			}
+			if found_index >= 0 {
+				errMsg := fmt.Sprintf("flight not found in mock with this id:%v", fs[0].ID)
+				assert.Error(t, errors.New(errMsg))
+			} else {
+				assert.Equal(t, mockFlights[found_index].FlightNo, fs[0].FlightNo)
+			}
 		}
 	}
-	req, err = http.NewRequest(http.MethodGet, "/flights?flightno=LA882", nil)
+	const flightno = "VN931"
+	req, err = http.NewRequest(http.MethodGet, "/flights?flightno="+flightno, nil)
 	if err != nil {
 		t.Errorf("Error creating request: %v", err)
 	}
@@ -50,13 +64,26 @@ func TestFlightsHandler(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error failed to convert rec.Body from JSON to []Flight: %v", err)
 		}
-		assert.Equal(t, len(mockFlights), len(fs))
 		if len(fs) > 0 {
-			assert.Equal(t, mockFlights[0].ID, fs[0].ID)
-			assert.Equal(t, mockFlights[0].FlightNo, fs[0].FlightNo)
+			assert.Equal(t, fs[0].FlightNo, flightno)
+			found_index := -1
+			for index := range mockFlights {
+				if mockFlights[index].FlightNo == flightno {
+					found_index = index
+					break
+				}
+			}
+			if found_index < 0 {
+				t.Errorf("flight with flightno:%v not found in mock-api", flightno)
+			}
 		}
 	}
-	api := "/flights?city_a=New%20York&city_b=Paris&time=2023-06-14"
+	const (
+		destCity    = "Paris"
+		sourceCity  = "New York"
+		apiTemplate = "/flights?city_a=%s&city_b=%s&time=2023-06-14"
+	)
+	api := strings.Replace(fmt.Sprintf(apiTemplate, sourceCity, destCity), " ", "%20", -1)
 	req, err = http.NewRequest(http.MethodGet, api, nil)
 	if err != nil {
 		t.Errorf("Error creating request: %v", err)
@@ -69,10 +96,12 @@ func TestFlightsHandler(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error failed to convert rec.Body from JSON to []Flight: %v", err)
 		}
-		assert.Equal(t, len(mockFlights), len(fs))
 		if len(fs) > 0 {
-			assert.Equal(t, mockFlights[0].ID, fs[0].ID)
-			assert.Equal(t, mockFlights[0].FlightNo, fs[0].FlightNo)
+			flight := fs[0]
+			assert.Equal(t, sourceCity, flight.Departure.City.Name)
+			assert.Equal(t, destCity, flight.Destination.City.Name)
+		} else {
+			t.Errorf("flight with flightno:%v not found in mock", flightno)
 		}
 	}
 }
