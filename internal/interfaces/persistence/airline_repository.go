@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"errors"
+
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
