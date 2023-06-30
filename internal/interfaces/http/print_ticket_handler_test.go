@@ -1,8 +1,8 @@
 package http
 
 import (
-	"bytes"
-	"encoding/json"
+	_ "bytes"
+	_ "encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,5 +20,6 @@ func TestTicketHandler(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 	err := ticketHandler(ctx)
+	assert.Error(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
 }

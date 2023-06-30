@@ -185,7 +185,7 @@ func TestUpdatePassenger(t *testing.T) {
 	assert.Equal(t, payload["lastName"].(string), updatedPassenger.LastName)
 	assert.Equal(t, payload["nationalCode"].(string), updatedPassenger.NationalCode)
 	assert.Equal(t, payload["email"].(string), updatedPassenger.Email)
-	assert.Equal(t, payload["gender"].(string), string(updatedPassenger.Gender))
+	assert.Equal(t, payload["gender"].(int), int(updatedPassenger.Gender))
 	assert.Equal(t, payload["birthDate"].(string), updatedPassenger.BirthDate.Format("2006-01-02"))
 	assert.Equal(t, payload["phone"].(string), updatedPassenger.Phone)
 	assert.Equal(t, payload["address"].(string), updatedPassenger.Address)
