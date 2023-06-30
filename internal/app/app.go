@@ -18,7 +18,7 @@ var (
 )
 
 type App struct {
-	E *echo.Echo
+	e *echo.Echo
 }
 
 func NewApp() *App {
@@ -26,13 +26,13 @@ func NewApp() *App {
 	routing(e)
 
 	return &App{
-		E: e,
+		e: e,
 	}
 }
 
 func (application *App) Start(portAddress string) error {
-	err := application.E.Start(fmt.Sprintf(":%s", portAddress))
-	application.E.Logger.Fatal(err)
+	err := application.e.Start(fmt.Sprintf(":%s", portAddress))
+	application.e.Logger.Fatal(err)
 	return err
 }
 
