@@ -9,14 +9,21 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
-type FlightRepository struct {
+type FlightRepository interface {
+	Create(input *domain.Flight) (*domain.Flight, error)
+	Update(input *domain.Flight) (*domain.Flight, error)
+	Get(id int) (*domain.Flight, error)
+	GetAll() (*[]domain.Flight, error)
+	Delete(id int) error
+}
+type FlightRepositoryImp struct {
 }
 
-func NewFlightRepository() *FlightRepository {
-	return &FlightRepository{}
+func NewFlightRepository() FlightRepository {
+	return &FlightRepositoryImp{}
 }
 
-func (a *FlightRepository) Create(input *domain.Flight) (*domain.Flight, error) {
+func (a FlightRepositoryImp) Create(input *domain.Flight) (*domain.Flight, error) {
 	var flight domain.Flight
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&flight)
@@ -46,7 +53,7 @@ func (a *FlightRepository) Create(input *domain.Flight) (*domain.Flight, error) 
 	return &flight, nil
 }
 
-func (a *FlightRepository) Update(input *domain.Flight) (*domain.Flight, error) {
+func (a FlightRepositoryImp) Update(input *domain.Flight) (*domain.Flight, error) {
 	var flight domain.Flight
 	_, err := a.Get(int(input.ID))
 	if err != nil {
@@ -64,7 +71,7 @@ func (a *FlightRepository) Update(input *domain.Flight) (*domain.Flight, error) 
 	return &flight, nil
 }
 
-func (a *FlightRepository) Get(id int) (*domain.Flight, error) {
+func (a FlightRepositoryImp) Get(id int) (*domain.Flight, error) {
 	var flight domain.Flight
 	db, _ := database.GetDatabaseConnection()
 	tx := db.First(&flight, id)
@@ -74,7 +81,7 @@ func (a *FlightRepository) Get(id int) (*domain.Flight, error) {
 	return &flight, nil
 }
 
-func (a *FlightRepository) GetAll() (*[]domain.Flight, error) {
+func (a FlightRepositoryImp) GetAll() (*[]domain.Flight, error) {
 	var flights []domain.Flight
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&flights)
@@ -94,7 +101,7 @@ func (a *FlightRepository) GetAll() (*[]domain.Flight, error) {
 	return &flights, nil
 }
 
-func (a *FlightRepository) Delete(id int) error {
+func (a FlightRepositoryImp) Delete(id int) error {
 	flight, err := a.Get(id)
 	if err != nil {
 		return err

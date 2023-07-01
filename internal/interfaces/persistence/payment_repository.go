@@ -9,14 +9,20 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
-type PaymentRepository struct {
+type PaymentRepository interface {
+	Create(input *domain.Payment) (*domain.Payment, error)
+	Update(input *domain.Payment) (*domain.Payment, error)
+	Get(id int) (*domain.Payment, error)
+	GetByOrderId(orderID int) (*domain.Payment, error)
+}
+type PaymentRepositoryImp struct {
 }
 
-func NewPaymentRepository() *PaymentRepository {
-	return &PaymentRepository{}
+func NewPaymentRepository() PaymentRepository {
+	return &PaymentRepositoryImp{}
 }
 
-func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) Create(input *domain.Payment) (*domain.Payment, error) {
 	db, _ := database.GetDatabaseConnection()
 	tx := db.Debug().Create(&input)
 
@@ -27,7 +33,7 @@ func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, erro
 	return input, nil
 }
 
-func (a *PaymentRepository) Update(input *domain.Payment) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) Update(input *domain.Payment) (*domain.Payment, error) {
 	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
@@ -52,7 +58,7 @@ func (a *PaymentRepository) Update(input *domain.Payment) (*domain.Payment, erro
 	return &payment, nil
 }
 
-func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) Get(id int) (*domain.Payment, error) {
 	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
@@ -72,41 +78,7 @@ func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
 	return &payment, nil
 }
 
-func (a *PaymentRepository) GetAll() (*[]domain.Payment, error) {
-	var payments []domain.Payment
-	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&payments)
-
-	checkPaymentExist := db.Debug().Find(&payments)
-
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payments, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
-	tx := db.Debug().Find(&payments)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	}
-
-	return &payments, nil
-}
-
-func (a *PaymentRepository) Delete(id int) error {
-	payment, err := a.Get(id)
-	if err != nil {
-		return err
-	}
-	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&payment)
-	deleted := db.Debug().Delete(payment).Commit()
-	if deleted.Error != nil {
-		return deleted.Error
-	}
-	return nil
-}
-
-func (a *PaymentRepository) GetByOrderId(orderID int) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) GetByOrderId(orderID int) (*domain.Payment, error) {
 	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
