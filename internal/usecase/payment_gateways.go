@@ -13,8 +13,6 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
-var redirectURL = config.Config.Payment.Redirect.Url
-
 type Bank string
 
 const (
@@ -25,8 +23,8 @@ func (b Bank) String() string {
 	return string(b)
 }
 
-var BANKS = map[Bank]Gateway{
-	Saderat: NewSaderatGateway(),
+var BANKS = map[Bank]func() Gateway{
+	Saderat: NewSaderatGateway,
 }
 
 func validateAndGetBank(bank string) (Bank, error) {
@@ -50,20 +48,23 @@ type Gateway interface {
 }
 
 type SaderatGateway struct {
-	name       Bank
-	tokenURL   string
-	paymentURL string
-	verifyURL  string
-	terminalId string
+	name        Bank
+	redirectURL string
+	tokenURL    string
+	paymentURL  string
+	verifyURL   string
+	terminalId  string
 }
 
-func NewSaderatGateway() SaderatGateway {
+func NewSaderatGateway() Gateway {
+
 	return SaderatGateway{
-		name:       Saderat,
-		tokenURL:   config.Config.Payment.Gateways.Saderat.Urls.Token,
-		paymentURL: config.Config.Payment.Gateways.Saderat.Urls.Payment,
-		verifyURL:  config.Config.Payment.Gateways.Saderat.Urls.Verify,
-		terminalId: config.Config.Payment.Gateways.Saderat.Terminal.Id,
+		name:        Saderat,
+		tokenURL:    config.Config.Payment.Gateways.Saderat.Urls.Token,
+		paymentURL:  config.Config.Payment.Gateways.Saderat.Urls.Payment,
+		verifyURL:   config.Config.Payment.Gateways.Saderat.Urls.Verify,
+		terminalId:  config.Config.Payment.Gateways.Saderat.Terminal.Id,
+		redirectURL: config.Config.Payment.Redirect.Url,
 	}
 }
 func (s SaderatGateway) GetName() string {
@@ -77,7 +78,7 @@ func (s SaderatGateway) GetPaymentPage(token string) PaymentPage {
 	}
 	return PaymentPage{
 		URL:      s.paymentURL,
-		Method:   "GET",
+		Method:   "POST",
 		DataType: "FORM",
 		Data:     data,
 	}
@@ -109,6 +110,10 @@ func (s SaderatGateway) VerifyPayment(data map[string][]string) (domain.Payment,
 	if amount <= 0 {
 		amount, _ = strconv.ParseInt(data["amount"][0], 10, 64)
 	}
+
+	invoiceID, _ := strconv.Atoi(data["invoiceid"][0])
+	payment.OrderID = uint(invoiceID)
+
 	payment.PayAmount = amount
 	return payment, nil
 }
@@ -119,7 +124,7 @@ func (s SaderatGateway) GetToken(order domain.Order) string {
 		"InvoiceID":   {fmt.Sprint(order.ID)},
 		"TerminalID":  {s.terminalId},
 		"Amount":      {fmt.Sprint(order.Amount)},
-		"callbackURL": {redirectURL + "?bank=" + s.GetName()},
+		"callbackURL": {s.redirectURL + "?bank=" + s.GetName()},
 	}
 	res, err := http.PostForm(s.tokenURL, data)
 
