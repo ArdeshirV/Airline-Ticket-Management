@@ -68,15 +68,8 @@ type Configuration struct {
 
 var Config *Configuration
 
-func IsTestMode() {
-	if testModeEnabled {
-		fmt.Println("run under go test")
-	} else {
-		fmt.Println("normal run")
-	}
-}
-
 func IsDebugMode() bool {
+	Load()
 	return Config.App.DebugMode
 }
 
@@ -98,11 +91,11 @@ func init() {
 func load() {
 	var err error
 	var conf *Configuration
-	testModeEnabled = strings.HasSuffix(os.Args[0], ".test")
-	appConfigFileName := os.Getenv("APP_CONFIG")
-	if appConfigFileName == "" {
+	appConfigFileName := os.Getenv("APP_CONFIG") // Defined in make file
+	if appConfigFileName == "" {                 // If run out of makefile use default config
 		appConfigFileName = "config-docker"
 	}
+	testModeEnabled = strings.HasSuffix(os.Args[0], ".test") // Run in test mode?
 	if testModeEnabled {
 		// The 'APP_ROOT' env-variable is defined in makefile and used by: 'make test'
 		address := os.Getenv("APP_ROOT")

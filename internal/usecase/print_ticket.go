@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
@@ -37,7 +36,7 @@ func GetTicketData(id int) (title string, contents [][]string, err error) {
 		}
 	}
 	if ticket == nil {
-		return "", nil, errors.New(fmt.Sprintf("ticket with id:'%v' not found", id))
+		return "", nil, fmt.Errorf("ticket with id:'%v' not found", id)
 	}
 	fmt.Printf("\\nticket: %v\\n", ticket)
 
@@ -57,6 +56,9 @@ func GetTicketData(id int) (title string, contents [][]string, err error) {
 }
 
 func createFakeTicket() *domain.Ticket {
+	if config.IsDebugMode() {
+		fmt.Printf("Debug: Create fake ticket")
+	}
 	return &domain.Ticket{}
 	/*&domain.Ticket{
 		FlightID: 1,

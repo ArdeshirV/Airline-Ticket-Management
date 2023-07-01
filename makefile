@@ -17,8 +17,10 @@ run:
 test:
 	go test -v -race ./... -count=1
 
-fmt:
+format:
 	find . -name '*.go' | while read -r file; do gofmt -w -s "$$file"; goimports -w "$$file"; done
+
+fmt: format
 
 clean:
 	rm -f ./$(APP_NAME)
