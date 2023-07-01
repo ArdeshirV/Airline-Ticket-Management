@@ -114,7 +114,9 @@ func flightsHandler(ctx echo.Context) error {
 		data = result
 	}
 
-	if testCode { fmt.Printf("ParamSortPrice: %v\n", ParamSortPrice) }
+	if testCode {
+		fmt.Printf("ParamSortPrice: %v\n", ParamSortPrice)
+	}
 
 	data = data.ApplySort(ParamSortPrice, priceSort).ApplySort(ParamSortDuration, durationSort).ApplySort(ParamSortArriveDatetime, arriveDatetimeSort).ApplySort(ParamSortDepatureDatetime, depatureDatetimeSort)
 
@@ -170,7 +172,9 @@ func (flights Flights) FilterFlightsByAirplaneId(airplaneId int) (Flights, error
 	filteredFlights := make(Flights, 0)
 
 	for _, flight := range flights {
-		if testCode { fmt.Printf("flight.AirplaneID: %v\n", flight.AirplaneID) }
+		if testCode {
+			fmt.Printf("flight.AirplaneID: %v\n", flight.AirplaneID)
+		}
 		if int(flight.AirplaneID) == airplaneId {
 			filteredFlights = append(filteredFlights, flight)
 		}
@@ -194,17 +198,19 @@ func (flights Flights) FilterFlightsByAirlineId(airlineId int) (Flights, error) 
 
 func (flights Flights) SortBy(sortOption SortOption, ascending bool) Flights {
 	switch sortOption {
-		case SortByPrice:{
-				sort.Slice(flights, func(i, j int) bool {
-					if ascending {
-						return flights[i].Price < flights[j].Price
-					} else {
-						return flights[i].Price > flights[j].Price
-					}
-				})
-				break
-			}
-		case SortByDepartureDatetime: {
+	case SortByPrice:
+		{
+			sort.Slice(flights, func(i, j int) bool {
+				if ascending {
+					return flights[i].Price < flights[j].Price
+				} else {
+					return flights[i].Price > flights[j].Price
+				}
+			})
+			break
+		}
+	case SortByDepartureDatetime:
+		{
 			sort.Slice(flights, func(i, j int) bool {
 				if ascending {
 					return flights[i].DepartureTime.Before(flights[j].DepartureTime)
@@ -214,7 +220,8 @@ func (flights Flights) SortBy(sortOption SortOption, ascending bool) Flights {
 			})
 			break
 		}
-		case SortByArrivalDatetime: {
+	case SortByArrivalDatetime:
+		{
 			sort.Slice(flights, func(i, j int) bool {
 				if ascending {
 					return flights[i].ArrivalTime.Before(flights[j].ArrivalTime)
@@ -224,7 +231,8 @@ func (flights Flights) SortBy(sortOption SortOption, ascending bool) Flights {
 			})
 			break
 		}
-		case SortByDurationDatetime: {
+	case SortByDurationDatetime:
+		{
 			sort.Slice(flights, func(i, j int) bool {
 				durationI := flights[i].ArrivalTime.Sub(flights[i].DepartureTime)
 				durationJ := flights[j].ArrivalTime.Sub(flights[j].DepartureTime)
@@ -245,7 +253,9 @@ func (flights Flights) ApplySort(sortName string, sortValue string) Flights {
 	var newFlights Flights = flights
 	isSortAscending := sortValue == "asc"
 
-	if testCode { fmt.Printf("sortName: %v %v\n", sortName, sortValue !="") }
+	if testCode {
+		fmt.Printf("sortName: %v %v\n", sortName, sortValue != "")
+	}
 
 	if sortName == ParamSortPrice && sortValue != "" {
 		newFlights = flights.SortBy(SortByPrice, isSortAscending)
