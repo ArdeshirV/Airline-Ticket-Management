@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -24,7 +25,7 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 	}
 
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ") // Todo: add to env
-	JwtTokenSecretConfig := config.Get(config.JwtTokenExpireHours)
+	JwtTokenSecretConfig := fmt.Sprint(config.Config.Jwt.Token.Expire.Hours)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
 		return []byte(JwtTokenSecretConfig), nil
