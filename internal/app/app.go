@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -12,8 +13,8 @@ import (
 )
 
 var (
-	store  = sessions.NewCookieStore()
-	secret = config.Get(config.JwtTokenExpireHours)
+	store     = sessions.NewCookieStore()
+	getSecret = func() string { return config.Config.Jwt.Token.Secret.Key }
 )
 
 type App struct {
@@ -29,8 +30,8 @@ func NewApp() *App {
 	}
 }
 
-func (application *App) Start(portAddress string) error {
-	err := application.E.Start(fmt.Sprintf(":%s", portAddress))
+func (application *App) Start(portAddress int) error {
+	err := application.E.Start(fmt.Sprintf(":%d", portAddress))
 	application.E.Logger.Fatal(err)
 	return err
 }
@@ -57,10 +58,10 @@ func routing(e *echo.Echo) {
 	orderRepo := persistence.NewOrderRepository()
 	paymentRepo := persistence.NewPaymentRepository()
 
-	payment := usecase.NewPayment(paymentRepo, orderRepo)
+	payment := usecase.NewPayment(&paymentRepo, orderRepo)
 	PaymentHandler := handlers.NewPaymentHandler(payment)
 
-	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo)
+	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo, paymentRepo)
 
 	BookingHandler := handlers.NewBookingHandler(booking)
 
@@ -87,7 +88,7 @@ func routing(e *echo.Echo) {
 }
 
 func initializeSessionStore() {
-	store = sessions.NewCookieStore([]byte(secret))
+	store = sessions.NewCookieStore([]byte(getSecret()))
 
 	// Set session options
 	store.Options = &sessions.Options{
