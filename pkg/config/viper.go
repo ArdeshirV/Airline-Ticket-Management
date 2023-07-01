@@ -10,22 +10,16 @@ import (
 
 var Config *Configuration
 
-func init() {
-	Load()
-}
+var Path = "."
 
 func Load() {
 	if Config == nil {
-		load()
+		conf, err := loadConfiguration(Path, "config", "yml")
+		if err != nil {
+			log.Fatal("Loading viper config faild")
+		}
+		Config = conf
 	}
-}
-
-func load() {
-	conf, err := loadConfiguration(".", "config", "yml")
-	if err != nil {
-		log.Fatal("Loading viper config faild")
-	}
-	Config = conf
 }
 
 type Configuration struct {
@@ -38,6 +32,7 @@ type Configuration struct {
 	}
 
 	Database struct {
+		Test     string
 		Name     string
 		User     string
 		Password string
@@ -83,9 +78,9 @@ type Configuration struct {
 		}
 	}
 	App struct {
-		Reserved string
-		DebugMode bool
-		ImageLogo string
+		Reserved       string
+		DebugMode      bool
+		ImageLogo      string
 		TicketFileName string
 	}
 }
