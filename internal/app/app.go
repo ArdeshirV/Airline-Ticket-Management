@@ -74,6 +74,7 @@ func routing(e *echo.Echo) {
 
 	// public routing
 	handlers.RootRoute(e)
+	handlers.DataRoute(e)
 	handlers.FlightsRoute(e)
 	handlers.PassengerRoute(e)
 	handlers.PrintTicketRoute(e)
