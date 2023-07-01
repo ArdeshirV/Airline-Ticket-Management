@@ -3,8 +3,6 @@ package http
 import (
 	"net/http"
 	"github.com/labstack/echo/v4"
-	"github.com/the-go-dragons/final-project/internal/domain"
-	"github.com/the-go-dragons/final-project/pkg/config"
 	"github.com/the-go-dragons/final-project/pkg/mock_api"
 )
 
@@ -63,5 +61,9 @@ func dataHandler(ctx echo.Context) error {
 			return echoJSON(ctx, http.StatusOK, filteredFlights)
 		}
 	}
-	return echoErrorAsJSON(ctx, http.StatusOK, filteredFlights)
+	flights, err := mock_api.GetFlights()
+	if err != nil {
+		return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
+	}
+	return echoJSON(ctx, http.StatusOK, flights)
 }

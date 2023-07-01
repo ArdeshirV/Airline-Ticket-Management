@@ -16,7 +16,7 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/mock_api"
 )
 
-func TestFlightsHandler(t *testing.T) {
+func TestdataHandler(t *testing.T) {
 	e := echo.New()
 	mockFlights, err := mock_api.GetFlights()
 	if err != nil {

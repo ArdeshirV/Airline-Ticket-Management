@@ -9,7 +9,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/domain"
-	"github.com/the-go-dragons/final-project/pkg/mock_api"
 )
 
 type Flights []domain.Flight
@@ -47,12 +46,9 @@ func FlightsRoute(e *echo.Echo) {
 	e.GET("/flights", flightsHandler)
 }
 
-// TODO: Please edit/complete end-point test commands
-// Here there is some examples:
 func flightsHandler(ctx echo.Context) error {
 	data := make(Flights, 0)
 
-	flightNo := ctx.QueryParam(ParamFlightNo)
 	minCapacity := ctx.QueryParam(ParamMinimumCapacity)
 	depatureDatetime := ctx.QueryParam(ParamDepartureDateTime)
 	arriveDatetime := ctx.QueryParam(ParamArriveDateTime)
@@ -68,13 +64,13 @@ func flightsHandler(ctx echo.Context) error {
 		numberMinCapacity, err := strconv.Atoi(minCapacity)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
 		data, err = data.FilterFlightsByMinimumCapacity(numberMinCapacity)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 	}
 
@@ -83,13 +79,13 @@ func flightsHandler(ctx echo.Context) error {
 		airplaneId, err := strconv.Atoi(airplane)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
 		data, err = data.FilterFlightsByAirplaneId(airplaneId)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 	}
 
@@ -98,13 +94,13 @@ func flightsHandler(ctx echo.Context) error {
 		airlineId, err := strconv.Atoi(airline)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
 		data, err = data.FilterFlightsByAirlineId(airlineId)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 	}
 
@@ -112,7 +108,7 @@ func flightsHandler(ctx echo.Context) error {
 		result, err := data.FilterFlightsByDepatureTimeAndArriveTime(depatureDatetime, arriveDatetime)
 
 		if err != nil {
-			return echoJSON(ctx, http.StatusBadRequest, APIResponse{ message: fmt.Sprintf("%v", err) })
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
 		data = result
