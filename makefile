@@ -26,4 +26,5 @@ clean:
 	rm -f ./$(APP_NAME)
 
 docker:
+	export APP_CONFIG=$(CONFIG_DOCKER)
 	docker-compose up --build
