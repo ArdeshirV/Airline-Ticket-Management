@@ -24,7 +24,7 @@ func (uh *UserHandler) Logout(c echo.Context) error {
 	}
 
 	tokenString := strings.TrimPrefix(authHeader, config.Config.Auth.TokenPrefix+" ")
-	JwtTokenSecretConfig := fmt.Sprintf("%v", config.Config.JwtToken.ExpireHours)
+	JwtTokenSecretConfig := fmt.Sprintf("%v", config.Config.Jwt.Token.Expire.Hours)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Return the key for verifying the token signature
 		return []byte(JwtTokenSecretConfig), nil

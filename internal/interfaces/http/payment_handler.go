@@ -14,14 +14,15 @@ type PayError struct {
 }
 
 type PayResult struct {
-	Result string
+	Result   string
+	OrederID int
 }
 
 type PaymentHandler struct {
-	Payment *usecase.Payment
+	Payment *usecase.PaymentService
 }
 
-func NewPaymentHandler(payment *usecase.Payment) PaymentHandler {
+func NewPaymentHandler(payment *usecase.PaymentService) PaymentHandler {
 	return PaymentHandler{Payment: payment}
 }
 func (p *PaymentHandler) Pay(c echo.Context) error {
@@ -53,18 +54,18 @@ func (p *PaymentHandler) Callback(c echo.Context) error {
 	if bank == "" {
 		return c.JSON(http.StatusBadRequest, PayError{Message: "Query parameter 'bank' is required"})
 	}
-	status, err := p.Payment.Callback(form, bank)
+	orderId, err := p.Payment.Callback(form, bank)
 	if err != nil {
 		switch err.(type) {
 		case usecase.InvalidBankName:
+			return c.JSON(http.StatusBadRequest, PayResult{Result: err.Error()})
+		case usecase.VerifyingPaymentFailed:
 			return c.JSON(http.StatusBadRequest, PayResult{Result: err.Error()})
 		default:
 			return c.JSON(http.StatusInternalServerError, nil)
 		}
 	}
-	if !status {
-		return c.JSON(http.StatusOK, PayResult{Result: "Faild"})
-	}
-	return c.JSON(http.StatusOK, PayResult{Result: "Successful"})
+
+	return c.JSON(http.StatusOK, PayResult{Result: "Successful", OrederID: orderId})
 
 }

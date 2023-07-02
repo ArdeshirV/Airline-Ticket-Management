@@ -7,14 +7,22 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
-type PassengerRepository struct {
+type PassengerRepository interface {
+	Create(input *domain.Passenger) (*domain.Passenger, error)
+	Update(input *domain.Passenger) (*domain.Passenger, error)
+	Get(id int) (*domain.Passenger, error)
+	GetAll() (*[]domain.Passenger, error)
+	GetList(IDs []int) ([]domain.Passenger, error)
+	Delete(id int) error
+}
+type PassengerRepositoryImp struct {
 }
 
-func NewPassengerRepository() *PassengerRepository {
-	return &PassengerRepository{}
+func NewPassengerRepository() PassengerRepository {
+	return &PassengerRepositoryImp{}
 }
 
-func (a *PassengerRepository) Create(input *domain.Passenger) (*domain.Passenger, error) {
+func (a PassengerRepositoryImp) Create(input *domain.Passenger) (*domain.Passenger, error) {
 	db, _ := database.GetDatabaseConnection()
 	if input.ID > 0 {
 		return nil, errors.New("can not create existing model")
@@ -24,7 +32,7 @@ func (a *PassengerRepository) Create(input *domain.Passenger) (*domain.Passenger
 	return input, nil
 }
 
-func (a *PassengerRepository) Update(input *domain.Passenger) (*domain.Passenger, error) {
+func (a PassengerRepositoryImp) Update(input *domain.Passenger) (*domain.Passenger, error) {
 	db, _ := database.GetDatabaseConnection()
 	_, err := a.Get(int(input.ID))
 	if err != nil {
@@ -38,7 +46,7 @@ func (a *PassengerRepository) Update(input *domain.Passenger) (*domain.Passenger
 	return input, nil
 }
 
-func (a *PassengerRepository) Get(id int) (*domain.Passenger, error) {
+func (a PassengerRepositoryImp) Get(id int) (*domain.Passenger, error) {
 	var passenger domain.Passenger
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&passenger)
@@ -54,7 +62,7 @@ func (a *PassengerRepository) Get(id int) (*domain.Passenger, error) {
 	return &passenger, nil
 }
 
-func (a *PassengerRepository) GetAll() (*[]domain.Passenger, error) {
+func (a PassengerRepositoryImp) GetAll() (*[]domain.Passenger, error) {
 	var passengers []domain.Passenger
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&passengers)
@@ -68,7 +76,7 @@ func (a *PassengerRepository) GetAll() (*[]domain.Passenger, error) {
 	return &passengers, nil
 }
 
-func (a *PassengerRepository) GetList(IDs []int) ([]domain.Passenger, error) {
+func (a PassengerRepositoryImp) GetList(IDs []int) ([]domain.Passenger, error) {
 	var passengers []domain.Passenger
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&passengers)
@@ -76,7 +84,7 @@ func (a *PassengerRepository) GetList(IDs []int) ([]domain.Passenger, error) {
 	return passengers, nil
 }
 
-func (a *PassengerRepository) Delete(id int) error {
+func (a PassengerRepositoryImp) Delete(id int) error {
 	passenger, err := a.Get(id)
 	if err != nil {
 		return err

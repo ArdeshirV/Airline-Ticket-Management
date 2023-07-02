@@ -6,12 +6,12 @@ import (
 )
 
 type BookingAction struct {
-	flightRepo    *persistence.FlightRepository
+	flightRepo    persistence.FlightRepository
 	passengerRepo *persistence.PassengerRepository
 	ticketRepo    *persistence.TicketRepository
 }
 
-func NewBookingAction(flightRepo *persistence.FlightRepository,
+func NewBookingAction(flightRepo persistence.FlightRepository,
 	ticketRepo *persistence.TicketRepository) *Booking {
 	return &Booking{
 		flightRepo: flightRepo,
