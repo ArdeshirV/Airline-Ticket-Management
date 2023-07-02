@@ -14,6 +14,7 @@ func CreateTicketAsPDF(id int, TicketFileName string) error {
 	if err != nil {
 		return err
 	}
+	// TODO: Use --> func GetAirlineLogoByName(name string) (string, error)
 	return pdf.CreatePDF(TicketFileName, title, config.Config.App.ImageLogo, data)
 }
 
