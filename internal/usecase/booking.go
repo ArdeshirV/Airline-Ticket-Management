@@ -7,22 +7,22 @@ import (
 )
 
 type Booking struct {
-	flightRepo    *persistence.FlightRepository
-	passengerRepo *persistence.PassengerRepository
-	orderRepo     *persistence.OrderRepository
-	paymentRepo   *persistence.PaymentRepository
+	flightRepo    persistence.FlightRepository
+	passengerRepo persistence.PassengerRepository
+	orderRepo     persistence.OrderRepository
+	paymentRepo   persistence.PaymentRepository
 	ticketRepo    *persistence.TicketRepository
 }
 
-func NewBooking(flightRepo *persistence.FlightRepository,
-	passengerRepo *persistence.PassengerRepository,
-	orderRepo *persistence.OrderRepository,
-	ticketRepo *persistence.TicketRepository) *Booking {
+func NewBooking(flightRepo persistence.FlightRepository,
+	passengerRepo persistence.PassengerRepository,
+	orderRepo persistence.OrderRepository,
+	paymentRepo persistence.PaymentRepository) *Booking {
 	return &Booking{
 		flightRepo:    flightRepo,
 		passengerRepo: passengerRepo,
 		orderRepo:     orderRepo,
-		ticketRepo:    ticketRepo,
+		paymentRepo:   paymentRepo,
 	}
 }
 

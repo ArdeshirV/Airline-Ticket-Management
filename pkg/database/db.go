@@ -26,7 +26,7 @@ var (
 	password string
 )
 
-func init() {
+func Load() {
 	db = config.Config.Database.Name
 	host = config.Config.Database.Host
 	port = config.Config.Database.Port

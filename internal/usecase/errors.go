@@ -70,3 +70,11 @@ type InvalidBankName struct {
 func (i InvalidBankName) Error() string {
 	return fmt.Sprint("Invalid bank name: ", i.name)
 }
+
+type VerifyingPaymentFailed struct {
+	orderID int
+}
+
+func (v VerifyingPaymentFailed) Error() string {
+	return fmt.Sprint("Verifying payment failed for orderId: ", v.orderID)
+}

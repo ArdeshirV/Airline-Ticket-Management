@@ -6,10 +6,10 @@ import (
 )
 
 type FlightUseCase struct {
-	flightRepo *persistence.FlightRepository
+	flightRepo persistence.FlightRepository
 }
 
-func NewFlightUseCase(flightRepo *persistence.FlightRepository) *FlightUseCase {
+func NewFlightUseCase(flightRepo persistence.FlightRepository) *FlightUseCase {
 	return &FlightUseCase{
 		flightRepo: flightRepo,
 	}

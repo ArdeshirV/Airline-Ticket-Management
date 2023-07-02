@@ -7,14 +7,23 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
-type OrderRepository struct {
+type OrderRepository interface {
+	Create(input *domain.Order) (*domain.Order, error)
+	Update(input *domain.Order) (*domain.Order, error)
+	Get(id int) (*domain.Order, error)
+	GetAll() (*[]domain.Order, error)
+	Delete(id int) error
+	GetItems(orderId uint) ([]domain.OrderItem, error)
+	GetByOrderNum(orderNum string) (domain.Order, error)
+}
+type OrderRepositoryImpl struct {
 }
 
-func NewOrderRepository() *OrderRepository {
-	return &OrderRepository{}
+func NewOrderRepository() OrderRepository {
+	return &OrderRepositoryImpl{}
 }
 
-func (r *OrderRepository) Create(input *domain.Order) (*domain.Order, error) {
+func (r OrderRepositoryImpl) Create(input *domain.Order) (*domain.Order, error) {
 	db, _ := database.GetDatabaseConnection() // todo: ignoring error, bad practice
 	if input.ID > 0 {
 		return nil, errors.New("can not create existing model")
@@ -24,7 +33,7 @@ func (r *OrderRepository) Create(input *domain.Order) (*domain.Order, error) {
 	return input, nil
 }
 
-func (r *OrderRepository) Update(input *domain.Order) (*domain.Order, error) {
+func (r OrderRepositoryImpl) Update(input *domain.Order) (*domain.Order, error) {
 	db, _ := database.GetDatabaseConnection()
 	_, err := r.Get(int(input.ID))
 	println("status:", input.Status)
@@ -39,7 +48,7 @@ func (r *OrderRepository) Update(input *domain.Order) (*domain.Order, error) {
 	return input, nil
 }
 
-func (r *OrderRepository) Get(id int) (*domain.Order, error) {
+func (r OrderRepositoryImpl) Get(id int) (*domain.Order, error) {
 	var order domain.Order
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&order)
@@ -51,7 +60,7 @@ func (r *OrderRepository) Get(id int) (*domain.Order, error) {
 	return &order, nil
 }
 
-func (r *OrderRepository) GetAll() (*[]domain.Order, error) {
+func (r OrderRepositoryImpl) GetAll() (*[]domain.Order, error) {
 	var orders []domain.Order
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&orders)
@@ -61,7 +70,7 @@ func (r *OrderRepository) GetAll() (*[]domain.Order, error) {
 	return &orders, nil
 }
 
-func (r *OrderRepository) Delete(id int) error {
+func (r OrderRepositoryImpl) Delete(id int) error {
 	order, err := r.Get(id)
 	if err != nil {
 		return err
@@ -75,7 +84,7 @@ func (r *OrderRepository) Delete(id int) error {
 	return nil
 }
 
-func (r *OrderRepository) GetItems(orderId uint) ([]domain.OrderItem, error) {
+func (r OrderRepositoryImpl) GetItems(orderId uint) ([]domain.OrderItem, error) {
 	var items []domain.OrderItem
 	db, _ := database.GetDatabaseConnection()
 	tx := db.Where("order_id = ?", orderId).Find(&items)
@@ -84,7 +93,7 @@ func (r *OrderRepository) GetItems(orderId uint) ([]domain.OrderItem, error) {
 	}
 	return items, nil
 }
-func (r *OrderRepository) GetByOrderNum(orderNum string) (domain.Order, error) {
+func (r OrderRepositoryImpl) GetByOrderNum(orderNum string) (domain.Order, error) {
 	var order domain.Order
 	db, _ := database.GetDatabaseConnection()
 	tx := db.Where("order_num = ?", orderNum).First(&order)
