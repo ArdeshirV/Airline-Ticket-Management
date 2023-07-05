@@ -33,8 +33,8 @@ type LoginHandler struct {
 }
 
 func GenerateToken(user *domain.User) (string, error) {
-	expirationHoursCofig := config.Config.Jwt.Token.Expire.Hours
-	JwtTokenSecretConfig := config.Config.Jwt.Token.Secret.Key
+	expirationHoursCofig := config.Config.JwtToken.ExpireHours
+	JwtTokenSecretConfig := config.Config.JwtToken.SecretKey
 
 	duration := time.Duration(expirationHoursCofig) * time.Hour
 	expirationTime := time.Now().Add(duration)
