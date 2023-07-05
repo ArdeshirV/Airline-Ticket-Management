@@ -15,12 +15,11 @@ var rootPath = "."
 func init() {
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "../..")
-	config.Path = dir
 	rootPath = dir
 }
 
 func Setup() {
-	config.Load()
+	config.Load(rootPath)
 	database.Load()
 	database.CreateDBConnection()
 }

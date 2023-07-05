@@ -19,7 +19,7 @@ type command string
 
 const (
 	airlineLogoFileName = "pdf/airline_logo.png"
-	APIGetLogo          = "http://localhost:%s/airline?logo_name=%s"
+	APIGetLogo          = "http://localhost:%d/airline?logo_name=%s"
 	APICities           = "http://localhost:%d/cities"
 	APIAirplanes        = "http://localhost:%d/airplanes"
 	APIDepartureDates   = "http://localhost:%d/departure_dates"
