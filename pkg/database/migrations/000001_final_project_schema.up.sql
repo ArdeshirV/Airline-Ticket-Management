@@ -117,7 +117,7 @@ CREATE  TABLE "public".flights (
 	departure_time       timestamptz  NOT NULL  ,
 	arrival_time         timestamptz    ,
 	airplane_id          bigint    ,
-	flight_class         bigint    ,
+	flight_class         varchar(255)    ,
 	price                bigint  NOT NULL  ,
 	remaining_capacity   bigint  NOT NULL  ,
 	cancel_condition     text    ,
@@ -140,6 +140,7 @@ CREATE  TABLE "public".orders (
 	updated_at           timestamptz    ,
 	deleted_at           timestamptz    ,
 	flight_id            bigint  NOT NULL  ,
+	user_id	 			 bigint  NOT NULL  ,
 	status               bigint  NOT NULL  ,
 	CONSTRAINT pk_orders PRIMARY KEY ( id )
  );
@@ -226,6 +227,8 @@ ALTER TABLE "public".order_items ADD CONSTRAINT fk_order_items_order_id FOREIGN 
 ALTER TABLE "public".order_items ADD CONSTRAINT fk_order_items_passengers FOREIGN KEY ( passenger_id ) REFERENCES "public".passengers( id );
 
 ALTER TABLE "public".orders ADD CONSTRAINT fk_orders_flight_id FOREIGN KEY ( flight_id ) REFERENCES "public".flights( id );
+
+ALTER TABLE "public".orders ADD CONSTRAINT fk_orders_user_id FOREIGN KEY ( user_id ) REFERENCES "public".users( id );
 
 ALTER TABLE "public".passengers ADD CONSTRAINT fk_users_passengers FOREIGN KEY ( user_id ) REFERENCES "public".users( id );
 
