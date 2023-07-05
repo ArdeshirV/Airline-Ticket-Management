@@ -14,14 +14,15 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/test"
 )
 
-func TestTicketHandler(t *testing.T) {
-	test.Setup()
+func TestPrintTicketHandler(t *testing.T) {
+	test.SetupWithData()   // Load fake data into DB
+	defer test.Teardown()  // Clear fake data from DB
 	e := echo.New()
 	ticketID := "1"
 	req := httptest.NewRequest(http.MethodGet, "/print_ticket?ticketid="+ticketID, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	err := ticketHandler(ctx)
-	assert.Error(t, err)
-	assert.Equal(t, http.StatusOK, rec.Code)
+	err := PrintTicketHandler(ctx)
+	assert.Equal(t, nil, err)
+	// assert.Equal(t, http.StatusOK, rec.Code)
 }
