@@ -10,9 +10,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Config *Configuration
-
-var Path = "."
+var (
+	Config *Configuration
+	Path = "."
+)
 
 func Load() {
 	if Config == nil {
@@ -24,6 +25,69 @@ func Load() {
 		Config = conf
 	}
 }
+
+type Configuration struct {
+	Server struct {
+		Port int
+	}
+	Mock struct {
+		Port int
+	}
+	Database struct {
+		Test     string
+		Name     string
+		User     string
+		Password string
+		Host     string
+		Port     int
+		Ssl      string
+		Timezone string
+	}
+	Pgadmin struct {
+		Mail string
+		Pw   string
+	}
+	JwtToken struct {
+		ExpireHours int
+		SecretKey string
+	}
+	Encryption struct {
+		SecretKey string
+	}
+	Payment struct {
+		RedirectUrl string
+		Gateways struct {
+			Saderat struct {
+				TerminalId string
+				Urls struct {
+						Token   string
+						Payment string
+						Verify  string
+				}
+			}
+		}
+	}
+	App struct {
+		Reserved       string
+		DebugMode      bool
+		ImageLogo      string
+		TicketFileName string
+	}
+	Auth struct {
+		TokenPrefix         string
+		RequestLogoutHeader string
+	}
+}
+
+func IsDebugMode() bool {
+	Load()
+	return Config.App.DebugMode
+}
+
+// ----------------------------------------------------------------------------------------
+var (
+	testModeEnabled bool
+)
 
 func loadConfiguration(configPath, configName, ConfigType string) (*Configuration, error) {
 	var config *Configuration
@@ -50,87 +114,12 @@ func loadConfiguration(configPath, configName, ConfigType string) (*Configuratio
 	return config, nil
 }
 
-type Configuration struct {
-	Server struct {
-		Port int
-	}
-
-	Mock struct {
-		Port int
-	}
-
-	Database struct {
-		Test     string
-		Name     string
-		User     string
-		Password string
-		Host     string
-		Port     int
-		Ssl      string
-		Timezone string
-	}
-	Pgadmin struct {
-		Mail string
-		Pw   string
-	}
-	Jwt struct {
-		Token struct {
-			Expire struct {
-				Hours int
-			}
-			Secret struct {
-				Key string
-			}
-		}
-	}
-	Encryption struct {
-		Secret struct {
-			Key string
-		}
-	}
-	Payment struct {
-		RedirectUrl string
-		Gateways    struct {
-			Saderat struct {
-				Terminal struct {
-					Id string
-				}
-				Urls struct {
-					Token   string
-					Payment string
-					Verify  string
-				}
-			}
-		}
-	}
-	App struct {
-		Reserved       string
-		DebugMode      bool
-		ImageLogo      string
-		TicketFileName string
-	}
-	Auth struct {
-		RequestLogoutHeader string
-		TokenPrefix         string
-	}
-}
-
-func IsDebugMode() bool {
-	Load()
-	return Config.App.DebugMode
-}
-
-// ----------------------------------------------------------------------------------------
-var (
-	testModeEnabled bool
-)
-
 func load() {
 	var err error
 	var conf *Configuration
 	appConfigFileName := os.Getenv("APP_CONFIG") // Defined in make file
 	if appConfigFileName == "" {                 // If run out of makefile use default config
-		appConfigFileName = "config-docker"
+		appConfigFileName = "config"
 	}
 	testModeEnabled = strings.HasSuffix(os.Args[0], ".test") // Run in test mode?
 	if testModeEnabled {

@@ -38,3 +38,6 @@ app:
   debugMode: true
   imageLogo: img/go-dragon.png
   ticketFileName: pdf/ticket.pdf
+auth:
+  TokenPrefix: brearer
+  RequestLogoutHeader: Authorization
