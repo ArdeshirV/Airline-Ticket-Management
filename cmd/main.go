@@ -20,9 +20,9 @@ func main() {
 	if err != nil {
 		fmt.Print(err.Error())
 	}
-	test.SetupWithData() // Load fake data
+	test.SetupWithData()  // Load fake data
+	defer test.Teardown() // Clean fake data
 	app := app.NewApp()
 	seeder.Run()
 	log.Fatalln(app.Start(config.Config.Server.Port))
-	test.Teardown()      // Clean fake data
 }
