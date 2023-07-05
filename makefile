@@ -3,7 +3,7 @@ PROJ=final-project
 export APP_NAME=$(PROJ)
 export APP_ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 export CONFIG_LOCAL=config-local
-export CONFIG_DOCKER=config-docker
+export CONFIG_DOCKER=config
 export DEBUG=true
 
 export APP_CONFIG=$(CONFIG_LOCAL)

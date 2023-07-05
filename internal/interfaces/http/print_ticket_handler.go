@@ -15,10 +15,10 @@ const (
 )
 
 func PrintTicketRoute(e *echo.Echo) {
-	e.GET("/print_ticket", ticketHandler)
+	e.GET("/print_ticket", PrintTicketHandler)
 }
 
-func ticketHandler(ctx echo.Context) error {
+func PrintTicketHandler(ctx echo.Context) error {
 	ticketid := ctx.QueryParam(ParamTicketID)
 	if ticketid == "" {
 		return echoStringAsJSON(ctx, http.StatusBadRequest, "the 'Ticketid' parameter is required")

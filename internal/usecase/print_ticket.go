@@ -3,7 +3,6 @@ package usecase
 import (
 	"fmt"
 
-	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 	"github.com/the-go-dragons/final-project/pkg/config"
 	"github.com/the-go-dragons/final-project/pkg/pdf"
@@ -22,74 +21,18 @@ func GetTicketData(id int) (title string, contents [][]string, err error) {
 	err = nil
 	title = "The Go Dragons - Team 3 of Quera Software Engineering Bootcamp"
 	tr := persistence.NewTicketRepository()
-	tickets, err := tr.GetAll()
+	//tickets, err := tr.GetAll()
+	ticket, err := tr.Get(id)
 	if err != nil {
 		return "", nil, err
 	}
-	var ticket *domain.Ticket = nil
-	if len(*tickets) == 0 {
-		ticket = createFakeTicket() // TODO: Remove this line when database works
-	} else {
-		for _, t := range *tickets {
-			if uint(t.ID) == uint(id) {
-				ticket = &t
-			}
-		}
-	}
-	if ticket == nil {
-		return "", nil, fmt.Errorf("ticket with id:'%v' not found", id)
-	}
-	fmt.Printf("\\nticket: %v\\n", ticket)
-
 	contents = [][]string{
-		{"Name", "Ardeshir1"}, {"Price", "10"},
-		{"Name", "Ardeshir2"}, {"Price", "10"},
-		{"Name", "Ardeshir3"}, {"Price", "10"},
-		{"Name", "Ardeshir4"}, {"Price", "10"},
-		{"Name", "Ardeshir5"}, {"Price", "10"},
-		{"Name", "Ardeshir6"}, {"Price", "10"},
-		{"Name", "Ardeshir7"}, {"Price", "10"},
-		{"Name", "Ardeshir8"}, {"Price", "10"},
-		{"Name", "Ardeshir9"}, {"Price", "10"},
-		{"Name", "Ardeshir10"}, {"Price", "10"},
+		{"First Name", ticket.Passenger.FirstName}, {"Flight No", ticket.Flight.FlightNo},
+		{"Last Name", ticket.Passenger.LastName}, {"Departure", ticket.Flight.Departure.Name}, {"Price", "10"},
+		{"National Code", ticket.Passenger.NationalCode}, {"Destination", ticket.Flight.Destination.Name}, {"Price", "10"},
+		{"Gender", fmt.Sprintf("%v", ticket.Passenger.Gender)}, {"Terminal", ticket.Flight.Departure.Terminal}, {"Price", "10"},
+		{"Birthday", ticket.Passenger.BirthDate.Format("2006/01/02")}, {"Flight Class", fmt.Sprintf("%v", ticket.Flight.FlightClass)}, {"Price", "10"},
 	}
+	fmt.Printf("%v", contents) // DEBUG
 	return title, contents, err
-}
-
-func createFakeTicket() *domain.Ticket {
-	if config.IsDebugMode() {
-		fmt.Printf("Debug: Create fake ticket")
-	}
-	return &domain.Ticket{}
-	/*&domain.Ticket{
-		FlightID: 1,
-		Flight: Flight {
-			FlightNo: "",
-			DepartureID: 1,
-			Departure: Airport {
-			},
-			DestinationID: 1,
-			Destination: Airport {
-			},
-			DepartureTime     time.Time   `json:"departuretime"`
-			ArrivalTime       time.Time   `json:"arrivaltime"`
-			AirplaneID        uint        `json:"airplaneid"`
-			Airplane          Airplane    `json:"airplane"`
-			FlightClass       FlightClass `json:"flightclass"`
-			Price             int         `json:"price"`
-			RemainingCapacity int         `json:"remainingcapacity"`
-			CancelCondition   string      `json:"cancelcondition"`
-		},
-		PassengerID: 1,
-		Passenger: Passenger {
-		},
-		PaymentID: 1,
-		Payment: Payment {
-		},
-		UserID: 1,
-		User: User {
-		},
-		PaymentStatus: "",
-		Refund: true,
-	}*/
 }
