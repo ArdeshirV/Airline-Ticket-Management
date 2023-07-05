@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type FlightClass string
+
+const (
+	FirstClass    FlightClass = "First Class"
+	BusinessClass FlightClass = "Business Class"
+	EconomyClass  FlightClass = "Economic Class"
+)
+
 type Flight struct {
 	gorm.Model
 	FlightNo          string      `json:"flightno"`
