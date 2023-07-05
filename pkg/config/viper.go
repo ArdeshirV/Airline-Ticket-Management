@@ -12,17 +12,16 @@ import (
 
 var (
 	Config *Configuration
-	Path = "."
 )
 
-func Load() {
+func Load(Path string) {
 	if Config == nil {
-		// load()
-		conf, err := loadConfiguration(Path, "config", "yml")
+		load(Path)
+		/*conf, err := loadConfiguration(Path, "config", "yml")
 		if err != nil {
 			log.Fatal("Loading viper config faild")
 		}
-		Config = conf
+		Config = conf*/
 	}
 }
 
@@ -49,20 +48,20 @@ type Configuration struct {
 	}
 	JwtToken struct {
 		ExpireHours int
-		SecretKey string
+		SecretKey   string
 	}
 	Encryption struct {
 		SecretKey string
 	}
 	Payment struct {
 		RedirectUrl string
-		Gateways struct {
+		Gateways    struct {
 			Saderat struct {
 				TerminalId string
-				Urls struct {
-						Token   string
-						Payment string
-						Verify  string
+				Urls       struct {
+					Token   string
+					Payment string
+					Verify  string
 				}
 			}
 		}
@@ -80,7 +79,7 @@ type Configuration struct {
 }
 
 func IsDebugMode() bool {
-	Load()
+	Load(".")
 	return Config.App.DebugMode
 }
 
@@ -114,7 +113,7 @@ func loadConfiguration(configPath, configName, ConfigType string) (*Configuratio
 	return config, nil
 }
 
-func load() {
+func load(Path string) {
 	var err error
 	var conf *Configuration
 	appConfigFileName := os.Getenv("APP_CONFIG") // Defined in make file
@@ -130,7 +129,7 @@ func load() {
 		}
 		conf, err = loadConfiguration(address, appConfigFileName, "yml")
 	} else {
-		conf, err = loadConfiguration(".", appConfigFileName, "yml")
+		conf, err = loadConfiguration(Path, appConfigFileName, "yml")
 	}
 	if err != nil {
 		log.Fatal("Loading viper config faild")
