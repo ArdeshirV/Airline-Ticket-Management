@@ -66,7 +66,7 @@ func NewSaderatGateway() Gateway {
 		tokenURL:   config.Config.Payment.Gateways.Saderat.Urls.Token,
 		paymentURL: config.Config.Payment.Gateways.Saderat.Urls.Payment,
 		verifyURL:  config.Config.Payment.Gateways.Saderat.Urls.Verify,
-		terminalId: config.Config.Payment.Gateways.Saderat.Terminal.Id,
+		terminalId: config.Config.Payment.Gateways.Saderat.TerminalId,
 	}
 }
 func (s SaderatGateway) GetName() string {

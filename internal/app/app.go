@@ -14,7 +14,7 @@ import (
 
 var (
 	store     = sessions.NewCookieStore()
-	getSecret = func() string { return config.Config.Jwt.Token.Secret.Key }
+	getSecret = func() string { return config.Config.JwtToken.SecretKey }
 )
 
 type App struct {
