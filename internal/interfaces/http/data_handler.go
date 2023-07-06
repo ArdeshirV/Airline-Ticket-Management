@@ -19,10 +19,8 @@ func DataRoute(e *echo.Echo) {
 }
 
 // Test this end-point with these commands:
-//
-//	              Get all flights: http://localhost:8080/data
-//	Get flights with specified ID: http://localhost:8080/data?flightno=VN931
-//
+//                 Get all flights: http://localhost:8080/data
+//   Get flights with specified ID: http://localhost:8080/data?flightno=VN931
 // Get flights from A to b in time: http://localhost:8080/data?city_a=New%20York&city_b=Paris&time=2023-06-14
 func dataHandler(ctx echo.Context) error {
 	flightNo := ctx.QueryParam(ParamFlightNo)
