@@ -14,7 +14,7 @@ import (
 )
 
 var getRedirectURL = func() string {
-	return config.Config.Payment.RedirectUrl
+	return config.Config.Payment.Redirect.Url
 }
 
 type Bank string
@@ -66,7 +66,7 @@ func NewSaderatGateway() Gateway {
 		tokenURL:   config.Config.Payment.Gateways.Saderat.Urls.Token,
 		paymentURL: config.Config.Payment.Gateways.Saderat.Urls.Payment,
 		verifyURL:  config.Config.Payment.Gateways.Saderat.Urls.Verify,
-		terminalId: config.Config.Payment.Gateways.Saderat.TerminalId,
+		terminalId: config.Config.Payment.Gateways.Saderat.Terminal.Id,
 	}
 }
 func (s SaderatGateway) GetName() string {

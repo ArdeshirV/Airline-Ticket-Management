@@ -15,14 +15,7 @@ var (
 )
 
 func Load(Path string) {
-	//if Config == nil {
-		load(Path)
-		/*conf, err := loadConfiguration(Path, "config", "yml")
-		if err != nil {
-			log.Fatal("Loading viper config faild")
-		}
-		Config = conf*/
-	//}
+	load(Path)
 }
 
 type Configuration struct {
@@ -55,10 +48,10 @@ type Configuration struct {
 	}
 	Payment struct {
 		RedirectUrl string
-		Gateways    struct {
+		Gateways struct {
 			Saderat struct {
 				TerminalId string
-				Urls       struct {
+				Urls struct {
 					Token   string
 					Payment string
 					Verify  string
@@ -81,6 +74,10 @@ type Configuration struct {
 func IsDebugMode() bool {
 	Load(".")
 	return Config.App.DebugMode
+}
+
+func IsTestMode() bool {
+	return testModeEnabled
 }
 
 // ----------------------------------------------------------------------------------------
