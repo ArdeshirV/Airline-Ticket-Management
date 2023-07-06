@@ -7,8 +7,14 @@ import (
 // Public Interface ----------------------------------------------------------------------
 
 type AirlineID int
+type AirlineTag int
 type AirlineName string
 type AirlineLogo string
+
+const (
+	AirlineLogoTag AirlineTag = 0
+	AirlineNameTag AirlineTag = 1
+)
 
 const (
 	AmericanAirline AirlineID = iota
@@ -36,35 +42,37 @@ const (
 	SingaporeAirlineName    AirlineName = "singapore_airlines"
 )
 
-func GetAirlineName(id AirlineID) AirlineName {
-	load()
-	return airlineNames[id]
+func (airlineID AirlineID) GetName() string {
+	return string(airlineNames[airlineID][int(AirlineNameTag)])
 }
 
-func GetAirlineNameList() []AirlineName {
-	load()
-	return airlineNames[:]
+func (airlineID AirlineID) GetLogo() (result string) {
+	return string(airlineNames[airlineID][int(AirlineLogoTag)])
+}
+
+func GetAirlineNames() (result [10][2]string) {
+	return airlineNames
 }
 
 // Private Implementation ----------------------------------------------------------------
 
 var (
-	airlineNames []AirlineName
+	airlineNames [10][2]string
 )
 
 func load() {
-	if airlineNames == nil {
-		airlineNames = make([]AirlineName, 10)
-		airlineNames[AmericanAirline] = AmericanAirlineName
-		airlineNames[DeltaAirLine] = DeltaAirLineName
-		airlineNames[UnitedAirline] = UnitedAirlineName
-		airlineNames[Lufthansa] = LufthansaName
-		airlineNames[Emirate] = EmirateName
-		airlineNames[BritishAirway] = BritishAirwayName
-		airlineNames[AirFrance] = AirFranceName
-		airlineNames[CathayPacificAirway] = CathayPacificAirwayName
-		airlineNames[QantasAirway] = QantasAirwayName
-		airlineNames[SingaporeAirline] = SingaporeAirlineName
+	if len(airlineNames) == 0 {
+		airlineNames := make([][2]string, 10)
+		airlineNames[AmericanAirline] = [2]string{string(AmericanAirlineName), "American Airline"}
+		airlineNames[DeltaAirLine] = [2]string{string(DeltaAirLineName), "Delta Airline"}
+		airlineNames[UnitedAirline] = [2]string{string(UnitedAirlineName), "United Airline"}
+		airlineNames[Lufthansa] = [2]string{string(LufthansaName), "Lufthansa"}
+		airlineNames[Emirate] = [2]string{string(EmirateName), "Emirate"}
+		airlineNames[BritishAirway] = [2]string{string(BritishAirwayName), "British Airways"}
+		airlineNames[AirFrance] = [2]string{string(AirFranceName), "Air France"}
+		airlineNames[CathayPacificAirway] = [2]string{string(CathayPacificAirwayName), "Cathay Pacific Airways"}
+		airlineNames[QantasAirway] = [2]string{string(QantasAirwayName), "Qantas Airways"}
+		airlineNames[SingaporeAirline] = [2]string{string(SingaporeAirlineName), "Singapore Airline"}
 	}
 }
 
