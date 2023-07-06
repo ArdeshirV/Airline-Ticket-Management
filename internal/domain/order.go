@@ -18,6 +18,7 @@ type Order struct {
 	Flight     Flight
 	Status     OrderStatus
 	OrderItems []OrderItem
+	UserID     uint
 }
 
 type OrderItem struct {
