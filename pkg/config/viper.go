@@ -16,12 +16,12 @@ var (
 
 func Load(Path string) {
 	//if Config == nil {
-		load(Path)
-		/*conf, err := loadConfiguration(Path, "config", "yml")
-		if err != nil {
-			log.Fatal("Loading viper config faild")
-		}
-		Config = conf*/
+	load(Path)
+	/*conf, err := loadConfiguration(Path, "config", "yml")
+	if err != nil {
+		log.Fatal("Loading viper config faild")
+	}
+	Config = conf*/
 	//}
 }
 
