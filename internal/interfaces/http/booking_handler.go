@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/usecase"
 )
@@ -41,8 +42,11 @@ func (b *BookingHandler) Book(c echo.Context) error {
 	if request.FlightID == 0 || len(request.PassengerIDs) == 0 {
 		return c.JSON(http.StatusBadRequest, BookingError{Message: "Missing required fields"})
 	}
-
-	orderID, err := b.booking.Book(request.FlightID, request.PassengerIDs)
+	userId := c.Get("session").(*sessions.Session).Values["userID"].(int)
+	if userId == 0 {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
+	}
+	orderID, err := b.booking.Book(request.FlightID, request.PassengerIDs, userId)
 	if err != nil {
 		switch err.(type) {
 		case usecase.FlightNotFound:
@@ -66,8 +70,12 @@ func (b *BookingHandler) Finalize(c echo.Context) error {
 	if request.OrderID == 0 {
 		return c.JSON(http.StatusBadRequest, BookingError{Message: "Missing required fields"})
 	}
+	userId := c.Get("session").(*sessions.Session).Values["userID"].(int)
+	if userId == 0 {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
+	}
 
-	err = b.booking.Finalize(request.OrderID)
+	err = b.booking.Finalize(request.OrderID, userId)
 	if err != nil {
 		switch err.(type) {
 		case usecase.OrderNotFound:
