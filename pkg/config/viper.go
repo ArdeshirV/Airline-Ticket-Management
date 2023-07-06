@@ -48,10 +48,10 @@ type Configuration struct {
 	}
 	Payment struct {
 		RedirectUrl string
-		Gateways struct {
+		Gateways    struct {
 			Saderat struct {
 				TerminalId string
-				Urls struct {
+				Urls       struct {
 					Token   string
 					Payment string
 					Verify  string
