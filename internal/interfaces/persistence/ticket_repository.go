@@ -116,16 +116,16 @@ func (a *TicketRepository) CreateList(input *[]domain.Ticket) (*[]domain.Ticket,
 }
 
 func (a *TicketRepository) GetByUserId(userId uint) (*[]domain.Ticket, error) {
-	tickets := make([]domain.Ticket, 0)
+	var tickets []domain.Ticket
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&tickets)
 
 	tx := db.
-		Preload("tickets").
-		Joins("join flights on tickets.FlightID = flights.ID").
-		Where("userID = ?", userId).
+		Table("tickets").
+		Joins("join flights on tickets.flight_id = flights.id").
+		Where("user_id = ?", userId).
 		Where("Refund = ?", false).
-		Where("flights.DepartureTime > ?", time.Now()).
+		Where("flights.departure_time > ?", time.Now()).
 		Find(&tickets)
 
 	if tx.Error != nil {
@@ -141,11 +141,11 @@ func (a *TicketRepository) GetCancelledByUserId(userId uint) (*[]domain.Ticket, 
 	db = db.Model(&tickets)
 
 	tx := db.
-		Preload("tickets").
-		Joins("join flights on tickets.FlightID = flights.ID").
-		Where("userID = ?", userId).
+		Table("tickets").
+		Joins("join flights on tickets.Flight_ID = flights.ID").
+		Where("user_ID = ?", userId).
 		Where("Refund = ?", true).
-		Where("flights.DepartureTime > ?", time.Now()).
+		Where("flights.Departure_Time > ?", time.Now()).
 		Find(&tickets)
 
 	if tx.Error != nil {
