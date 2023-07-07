@@ -2,21 +2,25 @@ package persistence
 
 import (
 	"errors"
-	"net/http"
-	"strconv"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
 )
 
-type PaymentRepository struct {
+type PaymentRepository interface {
+	Create(input *domain.Payment) (*domain.Payment, error)
+	Update(input *domain.Payment) (*domain.Payment, error)
+	Get(id int) (*domain.Payment, error)
+	GetByOrderId(orderID int) (*domain.Payment, error)
+}
+type PaymentRepositoryImp struct {
 }
 
-func NewPaymentRepository() *PaymentRepository {
-	return &PaymentRepository{}
+func NewPaymentRepository() PaymentRepository {
+	return &PaymentRepositoryImp{}
 }
 
-func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) Create(input *domain.Payment) (*domain.Payment, error) {
 	db, _ := database.GetDatabaseConnection()
 	tx := db.Debug().Create(&input)
 
@@ -27,43 +31,28 @@ func (a *PaymentRepository) Create(input *domain.Payment) (*domain.Payment, erro
 	return input, nil
 }
 
-func (a *PaymentRepository) Update(input *domain.Payment) (*domain.Payment, error) {
-	var payment domain.Payment
+func (a PaymentRepositoryImp) Update(input *domain.Payment) (*domain.Payment, error) {
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&payment)
-
-	checkPaymentExist := db.Debug().Where(&payment, "ID = ?", input.ID)
-
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payment, errors.New(strconv.Itoa(http.StatusNotFound))
+	_, err := a.Get(int(input.ID))
+	if err != nil {
+		return nil, errors.New("the model doesnt exists")
 	}
-
-	tx := checkPaymentExist.Update("ID", input.ID).Update("PayAmount", input.PayAmount).Update("PaymentSerial", input.PaymentSerial).Update("PayTime", input.PayTime)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	} else {
-		updatedPayment := tx.Commit()
-		if updatedPayment.RowsAffected < 1 {
-			return &payment, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
+	tx := db.Where("id = ?", input.ID).Save(input)
+	if tx.Error != nil {
+		return input, tx.Error
 	}
-
-	return &payment, nil
+	tx.Commit()
+	return input, nil
 }
 
-func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) Get(id int) (*domain.Payment, error) {
 	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
 
-	checkPaymentExist := db.Debug().Where(&payment, "ID = ?", id)
+	checkTicketExist := db.Debug().Where(&payment, "ID = ?", id)
 
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payment, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
-	tx := checkPaymentExist.Find(&payment)
+	tx := checkTicketExist.First(&payment)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -72,16 +61,10 @@ func (a *PaymentRepository) Get(id int) (*domain.Payment, error) {
 	return &payment, nil
 }
 
-func (a *PaymentRepository) GetAll() (*[]domain.Payment, error) {
+func (a PaymentRepositoryImp) GetAll() (*[]domain.Payment, error) {
 	var payments []domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payments)
-
-	checkPaymentExist := db.Debug().Find(&payments)
-
-	if checkPaymentExist.RowsAffected <= 0 {
-		return &payments, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
 
 	tx := db.Debug().Find(&payments)
 
@@ -92,7 +75,7 @@ func (a *PaymentRepository) GetAll() (*[]domain.Payment, error) {
 	return &payments, nil
 }
 
-func (a *PaymentRepository) Delete(id int) error {
+func (a PaymentRepositoryImp) Delete(id int) error {
 	payment, err := a.Get(id)
 	if err != nil {
 		return err
@@ -106,7 +89,7 @@ func (a *PaymentRepository) Delete(id int) error {
 	return nil
 }
 
-func (a *PaymentRepository) GetByOrderId(orderID int) (*domain.Payment, error) {
+func (a PaymentRepositoryImp) GetByOrderId(orderID int) (*domain.Payment, error) {
 	var payment domain.Payment
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)

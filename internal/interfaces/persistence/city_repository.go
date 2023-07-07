@@ -2,8 +2,6 @@ package persistence
 
 import (
 	"errors"
-	"net/http"
-	"strconv"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
@@ -17,50 +15,27 @@ func (a *CityRepository) New() *CityRepository {
 }
 
 func (a *CityRepository) Create(input *domain.City) (*domain.City, error) {
-	var city domain.City
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&city)
-
-	checkCityExist := db.Debug().First(&city, "ID = ?", input.ID)
-
-	if checkCityExist.RowsAffected > 0 {
-		return &city, errors.New(strconv.Itoa(http.StatusConflict))
+	if input.ID > 0 {
+		return nil, errors.New("can not create existing model")
 	}
+	db.Create(input)
 
-	city.Name = input.Name
-
-	addNewCity := db.Debug().Create(&city).Commit()
-
-	if addNewCity.RowsAffected < 1 {
-		return &city, errors.New(strconv.Itoa(http.StatusForbidden))
-	}
-
-	return &city, nil
+	return input, nil
 }
 
 func (a *CityRepository) Update(input *domain.City) (*domain.City, error) {
-	var city domain.City
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&city)
-
-	checkCityExist := db.Debug().Where(&city, "ID = ?", input.ID)
-
-	if checkCityExist.RowsAffected <= 0 {
-		return &city, errors.New(strconv.Itoa(http.StatusNotFound))
+	_, err := a.Get(int(input.ID))
+	if err != nil {
+		return nil, errors.New("the model doesnt exists")
 	}
-
-	tx := checkCityExist.Update("ID", input.ID).Update("Name", input.Name)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	} else {
-		updatedCity := tx.Commit()
-		if updatedCity.RowsAffected < 1 {
-			return &city, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
+	tx := db.Where("id = ?", input.ID).Save(input)
+	if tx.Error != nil {
+		return input, tx.Error
 	}
-
-	return &city, nil
+	tx.Commit()
+	return input, nil
 }
 
 func (a *CityRepository) Get(id int) (*domain.City, error) {
@@ -70,11 +45,7 @@ func (a *CityRepository) Get(id int) (*domain.City, error) {
 
 	checkCityExist := db.Debug().Where(&city, "ID = ?", id)
 
-	if checkCityExist.RowsAffected <= 0 {
-		return &city, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
-	tx := checkCityExist.Find(&city)
+	tx := checkCityExist.First(&city)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -87,12 +58,6 @@ func (a *CityRepository) GetAll() (*[]domain.City, error) {
 	var cities []domain.City
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&cities)
-
-	checkCityExist := db.Debug().Find(&cities)
-
-	if checkCityExist.RowsAffected <= 0 {
-		return &cities, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
 
 	tx := db.Debug().Find(&cities)
 

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 type command string
 
 const (
+	airlineLogoFileName = "pdf/airline_logo.png"
+	APIGetLogo          = "http://localhost:%d/airline?logo_name=%s"
 	APICities           = "http://localhost:%d/cities"
 	APIAirplanes        = "http://localhost:%d/airplanes"
 	APIDepartureDates   = "http://localhost:%d/departure_dates"
@@ -34,6 +37,24 @@ type ReserveResponse struct {
 	FlightNo          string `json:"flightno"`
 	Capacity          int    `json:"capacity"`
 	RemainingCapacity int    `json:"remainingcapacity"`
+}
+
+func GetAirlineLogoByName(name string) (string, error) {
+	url := fmt.Sprintf(APIGetLogo, config.Config.Mock.Port, string(name))
+	res, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	err = os.WriteFile(airlineLogoFileName, data, 0666)
+	if err != nil {
+		return "", err
+	}
+	return airlineLogoFileName, nil
 }
 
 func SetRemainingCapacity(flightNo string, cmd command) (resp *ReserveResponse, err error) {

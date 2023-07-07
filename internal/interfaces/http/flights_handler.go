@@ -9,17 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/domain"
-	"github.com/the-go-dragons/final-project/pkg/config"
-	"github.com/the-go-dragons/final-project/pkg/mock_api"
 )
-
-// Test ArdeshirV code by:
-//                 Get all flights: http://localhost:8080/flights
-//   Get flights with specified ID: http://localhost:8080/flights?flightno=VN931
-// Get flights from A to b in time: http://localhost:8080/flights?city_a=New%20York&city_b=Paris&time=2023-06-14
-
-// TODO: Test Amir Hosein code by:
-// http://localhost:8080/flights?...
 
 type Flights []domain.Flight
 type SortOption int
@@ -32,17 +22,13 @@ const (
 )
 
 const (
+	testCode = false
 
 	// sort types
 	AscendingSort  = "asc"
 	DescendingSort = "desc"
 
 	// params constant
-	ParamTime              = "time"
-	ParamCityA             = "city_a"
-	ParamCityB             = "city_b"
-	ParamCommand           = "command"
-	ParamFlightNo          = "flightno"
 	ParamMinimumCapacity   = "min_capacity"
 	ParamDepartureDateTime = "depature_datetime"
 	ParamArriveDateTime    = "arrive_datetime"
@@ -61,53 +47,7 @@ func FlightsRoute(e *echo.Echo) {
 }
 
 func flightsHandler(ctx echo.Context) error {
-	flightNo := ctx.QueryParam(ParamFlightNo)
-
-	if flightNo != "" {
-		fliteredFlight, err := mock_api.GetFlightsByFlightNo(flightNo)
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
-		//result = fliteredFlight
-		return echoJSON(ctx, http.StatusOK, fliteredFlight)
-	} else {
-		cityA := ctx.QueryParam(ParamCityA)
-		cityB := ctx.QueryParam(ParamCityB)
-		timeD := ctx.QueryParam(ParamTime)
-
-		if timeD != "" || cityA != "" || cityB != "" {
-			errMsg := ""
-			dataIsNotEnough := false
-
-			if timeD == "" {
-				dataIsNotEnough = true
-				errMsg += "'time' is not defined correctly. "
-			}
-
-			if cityA == "" {
-				dataIsNotEnough = true
-				errMsg += "'city_a' is not defined correctly. "
-			}
-
-			if cityB == "" {
-				dataIsNotEnough = true
-				errMsg += "'city_b' is not defined correctly. "
-			}
-
-			if dataIsNotEnough {
-				return echoStringAsJSON(ctx, http.StatusBadRequest, errMsg)
-			}
-
-			filteredFlights, err := mock_api.GetFlightsFromA2B(timeD, cityA, cityB)
-
-			if err != nil {
-				return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-			}
-
-			//result = filteredFlights
-			return echoJSON(ctx, http.StatusOK, filteredFlights)
-		}
-	}
+	data := make(Flights, 0)
 
 	minCapacity := ctx.QueryParam(ParamMinimumCapacity)
 	depatureDatetime := ctx.QueryParam(ParamDepartureDateTime)
@@ -119,9 +59,6 @@ func flightsHandler(ctx echo.Context) error {
 	arriveDatetimeSort := ctx.QueryParam(ParamSortArriveDatetime)
 	depatureDatetimeSort := ctx.QueryParam(ParamSortDepatureDatetime)
 
-	allFlights, err := mock_api.GetFlights()
-	var result Flights = allFlights
-
 	if minCapacity != "" {
 
 		numberMinCapacity, err := strconv.Atoi(minCapacity)
@@ -130,7 +67,7 @@ func flightsHandler(ctx echo.Context) error {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
-		result, err = result.FilterFlightsByMinimumCapacity(numberMinCapacity)
+		data, err = data.FilterFlightsByMinimumCapacity(numberMinCapacity)
 
 		if err != nil {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
@@ -145,7 +82,7 @@ func flightsHandler(ctx echo.Context) error {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
-		result, err = result.FilterFlightsByAirlineId(airplaneId)
+		data, err = data.FilterFlightsByAirplaneId(airplaneId)
 
 		if err != nil {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
@@ -160,7 +97,7 @@ func flightsHandler(ctx echo.Context) error {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 
-		result, err = result.FilterFlightsByAirlineId(airlineId)
+		data, err = data.FilterFlightsByAirlineId(airlineId)
 
 		if err != nil {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
@@ -168,20 +105,22 @@ func flightsHandler(ctx echo.Context) error {
 	}
 
 	if depatureDatetime != "" || arriveDatetime != "" {
-		result, err = result.FilterFlightsByDepatureTimeAndArriveTime(depatureDatetime, arriveDatetime)
+		result, err := data.FilterFlightsByDepatureTimeAndArriveTime(depatureDatetime, arriveDatetime)
+
+		if err != nil {
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
+		}
+
+		data = result
 	}
 
-	if err != nil {
-		return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
+	if testCode {
+		fmt.Printf("ParamSortPrice: %v\n", ParamSortPrice)
 	}
 
-	if config.IsDebugMode() {
-		fmt.Printf("ParamSortPrice: %v\n\n", ParamSortPrice)
-	}
+	data = data.ApplySort(ParamSortPrice, priceSort).ApplySort(ParamSortDuration, durationSort).ApplySort(ParamSortArriveDatetime, arriveDatetimeSort).ApplySort(ParamSortDepatureDatetime, depatureDatetimeSort)
 
-	result = result.ApplySort(ParamSortPrice, priceSort).ApplySort(ParamSortDuration, durationSort).ApplySort(ParamSortArriveDatetime, arriveDatetimeSort).ApplySort(ParamSortDepatureDatetime, depatureDatetimeSort)
-
-	return echoJSON(ctx, http.StatusOK, result)
+	return echoJSON(ctx, http.StatusOK, data)
 }
 
 func (flights Flights) FilterFlightsByMinimumCapacity(minimumCapacity int) (Flights, error) {
@@ -233,6 +172,9 @@ func (flights Flights) FilterFlightsByAirplaneId(airplaneId int) (Flights, error
 	filteredFlights := make(Flights, 0)
 
 	for _, flight := range flights {
+		if testCode {
+			fmt.Printf("flight.AirplaneID: %v\n", flight.AirplaneID)
+		}
 		if int(flight.AirplaneID) == airplaneId {
 			filteredFlights = append(filteredFlights, flight)
 		}
@@ -257,62 +199,77 @@ func (flights Flights) FilterFlightsByAirlineId(airlineId int) (Flights, error) 
 func (flights Flights) SortBy(sortOption SortOption, ascending bool) Flights {
 	switch sortOption {
 	case SortByPrice:
-		sort.Slice(flights, func(i, j int) bool {
-			if ascending {
-				return flights[i].Price < flights[j].Price
-			} else {
-				return flights[i].Price > flights[j].Price
-			}
-		})
+		{
+			sort.Slice(flights, func(i, j int) bool {
+				if ascending {
+					return flights[i].Price < flights[j].Price
+				} else {
+					return flights[i].Price > flights[j].Price
+				}
+			})
+			break
+		}
 	case SortByDepartureDatetime:
-		sort.Slice(flights, func(i, j int) bool {
-			if ascending {
-				return flights[i].DepartureTime.Before(flights[j].DepartureTime)
-			} else {
-				return flights[i].DepartureTime.After(flights[j].DepartureTime)
-			}
-		})
+		{
+			sort.Slice(flights, func(i, j int) bool {
+				if ascending {
+					return flights[i].DepartureTime.Before(flights[j].DepartureTime)
+				} else {
+					return flights[i].DepartureTime.After(flights[j].DepartureTime)
+				}
+			})
+			break
+		}
 	case SortByArrivalDatetime:
-		sort.Slice(flights, func(i, j int) bool {
-			if ascending {
-				return flights[i].ArrivalTime.Before(flights[j].ArrivalTime)
-			} else {
-				return flights[i].ArrivalTime.After(flights[j].ArrivalTime)
-			}
-		})
+		{
+			sort.Slice(flights, func(i, j int) bool {
+				if ascending {
+					return flights[i].ArrivalTime.Before(flights[j].ArrivalTime)
+				} else {
+					return flights[i].ArrivalTime.After(flights[j].ArrivalTime)
+				}
+			})
+			break
+		}
 	case SortByDurationDatetime:
-		sort.Slice(flights, func(i, j int) bool {
-			durationI := flights[i].ArrivalTime.Sub(flights[i].DepartureTime)
-			durationJ := flights[j].ArrivalTime.Sub(flights[j].DepartureTime)
-			if ascending {
-				return durationI < durationJ
-			} else {
-				return durationI > durationJ
-			}
-		})
+		{
+			sort.Slice(flights, func(i, j int) bool {
+				durationI := flights[i].ArrivalTime.Sub(flights[i].DepartureTime)
+				durationJ := flights[j].ArrivalTime.Sub(flights[j].DepartureTime)
+				if ascending {
+					return durationI < durationJ
+				} else {
+					return durationI > durationJ
+				}
+			})
+			break
+		}
 	}
 
 	return flights
 }
 
 func (flights Flights) ApplySort(sortName string, sortValue string) Flights {
-	// newFlights := make(Flights, 0)
-	var newFlights Flights
+	var newFlights Flights = flights
 	isSortAscending := sortValue == "asc"
 
-	if sortName == ParamSortPrice {
+	if testCode {
+		fmt.Printf("sortName: %v %v\n", sortName, sortValue != "")
+	}
+
+	if sortName == ParamSortPrice && sortValue != "" {
 		newFlights = flights.SortBy(SortByPrice, isSortAscending)
 	}
 
-	if sortName == ParamSortDuration {
+	if sortName == ParamSortDuration && sortValue != "" {
 		newFlights = flights.SortBy(SortByDurationDatetime, isSortAscending)
 	}
 
-	if sortName == ParamSortArriveDatetime {
+	if sortName == ParamSortArriveDatetime && sortValue != "" {
 		newFlights = flights.SortBy(SortByArrivalDatetime, isSortAscending)
 	}
 
-	if sortName == ParamSortDepatureDatetime {
+	if sortName == ParamSortDepatureDatetime && sortValue != "" {
 		newFlights = flights.SortBy(SortByDepartureDatetime, isSortAscending)
 	}
 

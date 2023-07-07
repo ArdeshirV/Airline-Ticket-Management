@@ -34,11 +34,9 @@ type LoginHandler struct {
 
 func GenerateToken(user *domain.User) (string, error) {
 	expirationHoursCofig := config.Config.JwtToken.ExpireHours
+	JwtTokenSecretConfig := config.Config.JwtToken.SecretKey
 
-	expirationCofigHoursValue := expirationHoursCofig
-	uintExpirationCofigHoursValue := uint(expirationCofigHoursValue)
-
-	duration := time.Duration(uintExpirationCofigHoursValue) * time.Hour
+	duration := time.Duration(expirationHoursCofig) * time.Hour
 	expirationTime := time.Now().Add(duration)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -46,7 +44,7 @@ func GenerateToken(user *domain.User) (string, error) {
 		"exp":    expirationTime.Unix(),
 	})
 
-	secretKey := []byte(config.Config.JwtToken.SecretKey)
+	secretKey := []byte(JwtTokenSecretConfig)
 	tokenString, err := token.SignedString(secretKey)
 	if err != nil {
 		return "", err

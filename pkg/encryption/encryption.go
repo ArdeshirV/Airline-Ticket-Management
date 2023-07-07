@@ -13,8 +13,7 @@ import (
 	"github.com/the-go-dragons/final-project/pkg/config"
 )
 
-// var key = []byte(config.Get(config.EncryptionSecretKey))
-var key = []byte(config.Config.Encryption.Secret.Key)
+var getKey = func() []byte { return []byte(config.Config.Encryption.SecretKey) }
 
 func Encrypt(plaintext interface{}) (string, error) {
 	// Convert the plaintext to a byte array
@@ -31,7 +30,7 @@ func Encrypt(plaintext interface{}) (string, error) {
 	}
 
 	// Generate a new AES cipher block using the key
-	block, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(getKey())
 	if err != nil {
 		return "", err
 	}
@@ -65,7 +64,7 @@ func Decrypt(ciphertext string) (interface{}, error) {
 	}
 
 	// Generate a new AES cipher block using the key
-	block, err := aes.NewCipher(key)
+	block, err := aes.NewCipher(getKey())
 	if err != nil {
 		return nil, err
 	}

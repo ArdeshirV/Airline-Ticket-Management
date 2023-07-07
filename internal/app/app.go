@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	store  = sessions.NewCookieStore()
-	secret = config.Config.JwtToken.ExpireHours
+	store     = sessions.NewCookieStore()
+	getSecret = func() string { return config.Config.JwtToken.SecretKey }
 )
 
 type App struct {
-	E *echo.Echo
+	e *echo.Echo
 }
 
 func NewApp() *App {
@@ -26,13 +26,13 @@ func NewApp() *App {
 	routing(e)
 
 	return &App{
-		E: e,
+		e: e,
 	}
 }
 
-func (application *App) Start(portAddress string) error {
-	err := application.E.Start(fmt.Sprintf(":%s", portAddress))
-	application.E.Logger.Fatal(err)
+func (application *App) Start(portAddress int) error {
+	err := application.e.Start(fmt.Sprintf(":%d", portAddress))
+	application.e.Logger.Fatal(err)
 	return err
 }
 
@@ -58,14 +58,13 @@ func routing(e *echo.Echo) {
 	orderRepo := persistence.NewOrderRepository()
 	paymentRepo := persistence.NewPaymentRepository()
 
-	payment := usecase.NewPayment(paymentRepo, orderRepo)
-	PaymentHandler := handlers.NewPaymentHandler(payment)
-
 	ticketRepo := persistence.NewTicketRepository()
 	ticketUsecase := usecase.NewTicketUsecase(ticketRepo)
 
-	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo, ticketRepo)
+	payment := usecase.NewPayment(&paymentRepo, orderRepo)
+	PaymentHandler := handlers.NewPaymentHandler(payment)
 
+	booking := usecase.NewBooking(flightRepo, passengerRepo, orderRepo, paymentRepo)
 	BookingHandler := handlers.NewBookingHandler(booking)
 
 	flightUseCase := usecase.NewFlightUseCase(flightRepo)
@@ -77,8 +76,10 @@ func routing(e *echo.Echo) {
 
 	// public routing
 	handlers.RootRoute(e)
-	handlers.TicketRoute(e)
+	handlers.DataRoute(e)
 	handlers.FlightsRoute(e)
+	handlers.PassengerRoute(e)
+	handlers.PrintTicketRoute(e)
 
 	e.POST("/signup", UserHandler.Signup)
 	e.POST("/login", UserHandler.Login)
@@ -93,7 +94,7 @@ func routing(e *echo.Echo) {
 }
 
 func initializeSessionStore() {
-	store = sessions.NewCookieStore([]byte(fmt.Sprintf("%v", secret)))
+	store = sessions.NewCookieStore([]byte(getSecret()))
 
 	// Set session options
 	store.Options = &sessions.Options{

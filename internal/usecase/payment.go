@@ -1,28 +1,28 @@
 package usecase
 
 import (
-	"strconv"
+	"errors"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 )
 
-type Payment struct {
+type PaymentService struct {
 	paymentRepo persistence.PaymentRepository
 	orderRepo   persistence.OrderRepository
 }
 
-func (Payment) GetGateway(bank Bank) Gateway {
-	return BANKS[bank]
+func (PaymentService) GetGateway(bank Bank) Gateway {
+	return BANKS[bank]()
 }
 func NewPayment(
 	paymentRepo *persistence.PaymentRepository,
-	orderRepo *persistence.OrderRepository,
-) *Payment {
-	return &Payment{paymentRepo: *paymentRepo, orderRepo: *orderRepo}
+	orderRepo persistence.OrderRepository,
+) *PaymentService {
+	return &PaymentService{paymentRepo: *paymentRepo, orderRepo: orderRepo}
 }
 
-func (p Payment) GetPaymentPage(orderID int, bankName string) (PaymentPage, error) {
+func (p PaymentService) GetPaymentPage(orderID int, bankName string) (PaymentPage, error) {
 	bank, err := validateAndGetBank(bankName)
 	if err != nil {
 		return PaymentPage{}, InvalidBankName{bankName}
@@ -36,28 +36,28 @@ func (p Payment) GetPaymentPage(orderID int, bankName string) (PaymentPage, erro
 	return url, nil
 }
 
-func (p Payment) Callback(data map[string][]string, bankName string) (bool, error) {
+func (p PaymentService) Callback(data map[string][]string, bankName string) (int, error) {
 	bank, err := validateAndGetBank(bankName)
 	if err != nil {
-		return false, InvalidBankName{bankName}
+		return 0, InvalidBankName{bankName}
 	}
 	payment, err := p.GetGateway(bank).VerifyPayment(data)
 	if err != nil {
-		return false, nil
+		return 0, VerifyingPaymentFailed{int(payment.OrderID)}
 	}
-	orderNum := data["invoiceid"][0]
+
 	// order, err := p.orderRepo.GetByOrderNum(orderNum)
-	id, _ := strconv.Atoi(orderNum)
-	order, err := p.orderRepo.Get(id)
+
+	order, err := p.orderRepo.Get(int(payment.OrderID))
 	if err != nil {
-		return false, nil
+		return 0, err
 	}
-	payment.OrderID = order.ID
+
 	if payment.PayAmount != order.Amount {
-		return false, nil
+		return 0, errors.New("wrong payment amount for order")
 	}
 	p.paymentRepo.Create(&payment)
 	order.Status = domain.PAID
 	p.orderRepo.Update(order)
-	return true, nil
+	return int(order.ID), nil
 }

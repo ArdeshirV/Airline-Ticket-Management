@@ -7,26 +7,26 @@ import (
 )
 
 type Booking struct {
-	flightRepo    *persistence.FlightRepository
-	passengerRepo *persistence.PassengerRepository
-	orderRepo     *persistence.OrderRepository
-	paymentRepo   *persistence.PaymentRepository
+	flightRepo    persistence.FlightRepository
+	passengerRepo persistence.PassengerRepository
+	orderRepo     persistence.OrderRepository
+	paymentRepo   persistence.PaymentRepository
 	ticketRepo    *persistence.TicketRepository
 }
 
-func NewBooking(flightRepo *persistence.FlightRepository,
-	passengerRepo *persistence.PassengerRepository,
-	orderRepo *persistence.OrderRepository,
-	ticketRepo *persistence.TicketRepository) *Booking {
+func NewBooking(flightRepo persistence.FlightRepository,
+	passengerRepo persistence.PassengerRepository,
+	orderRepo persistence.OrderRepository,
+	paymentRepo persistence.PaymentRepository) *Booking {
 	return &Booking{
 		flightRepo:    flightRepo,
 		passengerRepo: passengerRepo,
 		orderRepo:     orderRepo,
-		ticketRepo:    ticketRepo,
+		paymentRepo:   paymentRepo,
 	}
 }
 
-func (b Booking) Book(flightID int, passengerIDs []int) (uint, error) {
+func (b Booking) Book(flightID int, passengerIDs []int, userId int) (uint, error) {
 	flight, err := b.flightRepo.Get(flightID)
 	if err != nil {
 		return 0, FlightNotFound{flightID}
@@ -51,6 +51,7 @@ func (b Booking) Book(flightID int, passengerIDs []int) (uint, error) {
 		FlightID:   flight.ID,
 		Status:     domain.PENDING,
 		OrderNum:   uuid.New().String(),
+		UserID:     uint(userId),
 	}
 
 	newOrder, err := b.orderRepo.Create(&order)
@@ -61,7 +62,7 @@ func (b Booking) Book(flightID int, passengerIDs []int) (uint, error) {
 	return newOrder.ID, nil
 }
 
-func (b Booking) Finalize(orderID int) error {
+func (b Booking) Finalize(orderID int, userId int) error {
 	order, err := b.orderRepo.Get(orderID)
 	if err != nil {
 		println(orderID, err.Error())
@@ -95,8 +96,7 @@ func (b Booking) Finalize(orderID int) error {
 			PaymentID:     payment.ID,
 			PaymentStatus: "PAID",
 			Refund:        false,
-			// Todo: must read user from security context
-			UserID: 1,
+			UserID:        uint(userId),
 		}
 		tickets = append(tickets, ticket)
 	}

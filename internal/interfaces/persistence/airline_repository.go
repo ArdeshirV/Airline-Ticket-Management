@@ -2,8 +2,6 @@ package persistence
 
 import (
 	"errors"
-	"net/http"
-	"strconv"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
@@ -18,51 +16,27 @@ func (r *AirlineRepository) New() *AirlineRepository {
 }
 
 func (r *AirlineRepository) Create(input *domain.Airline) (*domain.Airline, error) {
-	var airline domain.Airline
-	db, _ := database.GetDatabaseConnection() // todo: ignoring error, bad practice
-	db = db.Model(&airline)
-
-	checkAirlineExist := db.Debug().First(&airline, "ID = ?", input.ID)
-
-	if checkAirlineExist.RowsAffected > 0 {
-		return &airline, errors.New(strconv.Itoa(http.StatusConflict))
+	db, _ := database.GetDatabaseConnection()
+	if input.ID > 0 {
+		return nil, errors.New("can not create existing model")
 	}
+	db.Create(input)
 
-	airline.Name = input.Name
-	airline.Logo = input.Logo
-
-	addNewAirline := db.Debug().Create(&airline).Commit()
-
-	if addNewAirline.RowsAffected < 1 {
-		return &airline, errors.New(strconv.Itoa(http.StatusForbidden))
-	}
-
-	return &airline, nil
+	return input, nil
 }
 
 func (r *AirlineRepository) Update(input *domain.Airline) (*domain.Airline, error) {
-	var airline domain.Airline
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&airline)
-
-	checkAirlineExist := db.Debug().Where(&airline, "ID = ?", input.ID)
-
-	if checkAirlineExist.RowsAffected <= 0 {
-		return &airline, errors.New(strconv.Itoa(http.StatusNotFound))
+	_, err := r.Get(int(input.ID))
+	if err != nil {
+		return nil, errors.New("the model doesnt exists")
 	}
-
-	tx := checkAirlineExist.Update("ID", input.ID).Update("Name", input.Name).Update("Logo", input.Logo)
-
-	if err := tx.Error; err != nil {
-		return nil, err
-	} else {
-		updatedAirline := tx.Commit()
-		if updatedAirline.RowsAffected < 1 {
-			return &airline, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
+	tx := db.Where("id = ?", input.ID).Save(input)
+	if tx.Error != nil {
+		return input, tx.Error
 	}
-
-	return &airline, nil
+	tx.Commit()
+	return input, nil
 }
 
 func (r *AirlineRepository) Get(id int) (*domain.Airline, error) {
@@ -72,19 +46,10 @@ func (r *AirlineRepository) Get(id int) (*domain.Airline, error) {
 
 	checkAirlineExist := db.Debug().Where(&airline, "ID = ?", id)
 
-	if checkAirlineExist.RowsAffected <= 0 {
-		return &airline, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
-	tx := db.Debug().Where("ID = ?", id).Find(&airline)
+	tx := checkAirlineExist.First(&airline)
 
 	if err := tx.Error; err != nil {
 		return nil, err
-	} else {
-		updatedAirline := tx.Commit()
-		if updatedAirline.RowsAffected < 1 {
-			return &airline, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
 	}
 
 	return &airline, nil
@@ -95,21 +60,10 @@ func (r *AirlineRepository) GetAll() (*[]domain.Airline, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&airlines)
 
-	checkAirlineExist := db.Debug().Find(&airlines)
-
-	if checkAirlineExist.RowsAffected <= 0 {
-		return &airlines, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
-
 	tx := db.Debug().Find(&airlines)
 
 	if err := tx.Error; err != nil {
 		return nil, err
-	} else {
-		updatedAirline := tx.Commit()
-		if updatedAirline.RowsAffected < 1 {
-			return &airlines, errors.New(strconv.Itoa(http.StatusForbidden))
-		}
 	}
 
 	return &airlines, nil
