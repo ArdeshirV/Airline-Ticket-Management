@@ -35,13 +35,13 @@ func (ur *UserRepository) GetById(id uint) (*domain.User, error) {
 }
 
 func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
-	user := new(domain.User)
+	var user domain.User
 	db, _ := database.GetDatabaseConnection()
-	db.Where("email = ?", email).First(&user)
-	if user.ID == 0 {
+	tx := db.Where("email = ?", email).First(&user)
+	if tx.Error != nil {
 		return nil, errors.New("User not found")
 	}
-	return user, nil
+	return &user, nil
 }
 
 func (ur *UserRepository) GeByUsername(username string) (*domain.User, error) {
