@@ -11,7 +11,7 @@ type AirlineRepository struct {
 	// todo: you could have a database connection as your repository struct, so you don't have to use something like this in each method: db, _ := database.GetDatabaseConnection()
 }
 
-func (r *AirlineRepository) New() *AirlineRepository {
+func NewAirlineRepsoitory() *AirlineRepository {
 	return &AirlineRepository{}
 }
 
