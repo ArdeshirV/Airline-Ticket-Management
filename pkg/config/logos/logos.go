@@ -54,6 +54,10 @@ func GetAirlineNames() (result [10][2]string) {
 	return airlineNames
 }
 
+func GetAirlineLogoByName(name string) (string, error) {
+	return "", nil
+}
+
 // Private Implementation ----------------------------------------------------------------
 
 var (
