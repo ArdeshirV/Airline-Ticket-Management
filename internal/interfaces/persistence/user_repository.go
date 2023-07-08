@@ -27,9 +27,9 @@ func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
 func (ur *UserRepository) GetById(id uint) (*domain.User, error) {
 	user := new(domain.User)
 	db, _ := database.GetDatabaseConnection()
-	db.Where("id = ?", id).First(&user)
-	if user.ID == 0 {
-		return nil, errors.New("User not found")
+	tx := db.Debug().Where("id = ?", id).First(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return user, nil
 }
@@ -39,7 +39,7 @@ func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
 	db, _ := database.GetDatabaseConnection()
 	tx := db.Where("email = ?", email).First(&user)
 	if tx.Error != nil {
-		return nil, errors.New("User not found")
+		return nil, tx.Error
 	}
 	return &user, nil
 }
@@ -47,9 +47,9 @@ func (ur *UserRepository) GetByEmail(email string) (*domain.User, error) {
 func (ur *UserRepository) GeByUsername(username string) (*domain.User, error) {
 	user := new(domain.User)
 	db, _ := database.GetDatabaseConnection()
-	db.Where("username = ?", username).First(&user)
-	if user.ID == 0 {
-		return nil, errors.New("User not found")
+	tx := db.Where("username = ?", username).First(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return user, nil
 }
@@ -57,14 +57,14 @@ func (ur *UserRepository) GeByUsername(username string) (*domain.User, error) {
 func (ur *UserRepository) UpdateById(id uint, newUser *domain.User) (*domain.User, error) {
 	db, _ := database.GetDatabaseConnection()
 	user := new(domain.User)
-	result := db.First(&user, id)
+	result := db.Debug().First(&user, id)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	user.IsLoginRequired = newUser.IsLoginRequired
-	db.Save(&user)
+	db.Debug().Save(&user)
 
 	return user, nil
 }
