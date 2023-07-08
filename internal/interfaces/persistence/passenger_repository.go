@@ -15,6 +15,7 @@ type PassengerRepository interface {
 	GetList(IDs []int) ([]domain.Passenger, error)
 	Delete(id int) error
 }
+
 type PassengerRepositoryImp struct {
 }
 
