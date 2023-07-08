@@ -48,9 +48,9 @@ func (rr *RoleRepository) GetById(id int) (*domain.Role, error) {
 func (rr *RoleRepository) GetByName(name string) (*domain.Role, error) {
 	role := new(domain.Role)
 	db, _ := database.GetDatabaseConnection()
-	db.Where("name = ?", name).First(&role)
-	if role.ID == 0 {
-		return nil, errors.New("Role not found")
+	tx := db.Where("name = ?", name).First(&role)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return role, nil
 }
