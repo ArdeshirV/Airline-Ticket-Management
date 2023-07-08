@@ -29,10 +29,10 @@ func GetTicketData(id int) (title string, contents [][]string, err error) {
 	}
 	contents = [][]string{
 		{"First Name", ticket.Passenger.FirstName}, {"Flight No", ticket.Flight.FlightNo},
-		{"Last Name", ticket.Passenger.LastName}, {"Departure", ticket.Flight.Departure.Name}, {"Price", "10"},
-		{"National Code", ticket.Passenger.NationalCode}, {"Destination", ticket.Flight.Destination.Name}, {"Price", "10"},
-		{"Gender", fmt.Sprintf("%v", ticket.Passenger.Gender)}, {"Terminal", ticket.Flight.Departure.Terminal}, {"Price", "10"},
-		{"Birthday", ticket.Passenger.BirthDate.Format("2006/01/02")}, {"Flight Class", fmt.Sprintf("%v", ticket.Flight.FlightClass)}, {"Price", "10"},
+		{"Last Name", ticket.Passenger.LastName}, {"Departure", ticket.Flight.Departure.Name},
+		{"National Code", ticket.Passenger.NationalCode}, {"Destination", ticket.Flight.Destination.Name},
+		{"Gender", fmt.Sprintf("%v", ticket.Passenger.Gender)}, {"Flight Class", fmt.Sprintf("%v", ticket.Flight.FlightClass)},
+		{"Birthday", ticket.Passenger.BirthDate.Format("2006/01/02")}, {"Terminal", ticket.Flight.Departure.Terminal},
 	}
 	fmt.Printf("\n\n\033[0;36m%v\033[0m\n\n", contents) // DEBUG
 	return title, contents, err
