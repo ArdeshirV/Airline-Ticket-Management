@@ -13,6 +13,7 @@ func CreateTicketAsPDF(id int, TicketFileName string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("\n\033[0mtitle = %v\ndata = %v\033[0m\n\n", title, data)
 	// TODO: Use --> func GetAirlineLogoByName(name string) (string, error)
 	return pdf.CreatePDF(TicketFileName, title, config.Config.App.ImageLogo, data)
 }
@@ -33,6 +34,6 @@ func GetTicketData(id int) (title string, contents [][]string, err error) {
 		{"Gender", fmt.Sprintf("%v", ticket.Passenger.Gender)}, {"Terminal", ticket.Flight.Departure.Terminal}, {"Price", "10"},
 		{"Birthday", ticket.Passenger.BirthDate.Format("2006/01/02")}, {"Flight Class", fmt.Sprintf("%v", ticket.Flight.FlightClass)}, {"Price", "10"},
 	}
-	fmt.Printf("%v", contents) // DEBUG
+	fmt.Printf("\n\n\033[0;36m%v\033[0m\n\n", contents) // DEBUG
 	return title, contents, err
 }
