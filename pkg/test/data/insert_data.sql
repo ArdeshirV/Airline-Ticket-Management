@@ -34,8 +34,8 @@ insert into airlines (id,name,logo,created_at,updated_at)
 --------------------------------------------
 insert into airplanes (id,name,airline_id,capacity,created_at,updated_at)
 	values
-	(2001,'McDonnell Douglas MD-80',1,130,NOW(),NOW()),
-	(2002,'Boeing 747',2,550,NOW(),NOW()),
+	(2001,'McDonnell Douglas MD-80',2,130,NOW(),NOW()),
+	(2002,'Boeing 747',1,550,NOW(),NOW()),
 	(2003,'ATR 72',3,81,NOW(),NOW()),
 	(2004,'Airbus A320 family',4,180,NOW(),NOW()),
 	(2005,'McDonnell Douglas MD-80',5,130,NOW(),NOW()),
@@ -71,7 +71,8 @@ insert into passengers  (id,first_name,last_name,national_code,gender,birth_date
 ------------------------------------------------------------
 insert into orders (id,order_num,amount,flight_id,status,user_id,created_at,updated_at)
 	values
-	(600,'654987321A',17000000,303,2,10,NOW(),NOW());
+	(600,'654987321A',17000000,303,2,10,NOW(),NOW()),
+	(601,'654987322A',20000000,304,2,10,NOW(),NOW());
 -----------------------------------------------------------
 insert into order_items  (id,passenger_id,order_id,created_at,updated_at)
 	values
@@ -79,8 +80,10 @@ insert into order_items  (id,passenger_id,order_id,created_at,updated_at)
 ----------------------------------------------------------
 insert into payments  (id,pay_amount,pay_time,payment_serial,order_id,created_at,updated_at)
 	values
-	(100,17000000,now()::date - interval '10 hours','98765434321',600,NOW(),NOW());
+	(100,17000000,now()::date - interval '10 hours','98765434321',600,NOW(),NOW()),
+	(101,20000000,now()::date - interval '9 hours','98765434331',601,NOW(),NOW());
 -----------------------------------------------------------
 insert into tickets  (id,flight_id,passenger_id,payment_id,payment_status,user_id,refund,created_at,updated_at)
 	values
-	(100,303,401,100,'Paid',10,false,NOW(),NOW());
+	(100,303,401,100,'Paid',10,false,NOW(),NOW()),
+	(101,304,402,100,'Paid',10,false,NOW(),NOW());
