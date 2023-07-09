@@ -43,7 +43,7 @@ func (a *CityRepository) Get(id int) (*domain.City, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&city)
 
-	checkCityExist := db.Debug().Where(&city, "ID = ?", id)
+	checkCityExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkCityExist.First(&city)
 

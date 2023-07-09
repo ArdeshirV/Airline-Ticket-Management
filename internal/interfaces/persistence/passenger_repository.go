@@ -50,11 +50,8 @@ func (a PassengerRepositoryImp) Update(input *domain.Passenger) (*domain.Passeng
 func (a PassengerRepositoryImp) Get(id int) (*domain.Passenger, error) {
 	var passenger domain.Passenger
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&passenger)
 
-	checkPassengerExist := db.Debug().Where(&passenger, "ID = ?", id)
-
-	tx := checkPassengerExist.First(&passenger)
+	tx := db.First(&passenger, id)
 
 	if err := tx.Error; err != nil {
 		return nil, err
