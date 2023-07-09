@@ -18,16 +18,16 @@ func PassengerRoute(e *echo.Echo) {
 }
 
 func AddPassenger(c echo.Context) error {
-	var newPassenger *domain.Passenger
-	if err := c.Bind(newPassenger); err != nil {
+	var passenger *domain.Passenger
+	if err := c.Bind(passenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
 	pr := persistence.NewPassengerRepository()
-	response, err := pr.Create(newPassenger)
-	if err != nil {
+	if _, err := pr.Create(passenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
-	return echoJSON(c, http.StatusOK, *response)
+	msg := fmt.Sprintf("passenger with ID:%d added", passenger.ID)
+	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 
 func DeletePassenger(c echo.Context) error {
