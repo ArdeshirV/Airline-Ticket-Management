@@ -74,7 +74,7 @@ func (ur *UserRepository) Get(id int) (*domain.User, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&user)
 
-	checkUserExist := db.Debug().Where(&user, "ID = ?", id)
+	checkUserExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkUserExist.First(&user)
 

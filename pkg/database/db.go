@@ -101,7 +101,7 @@ func AutoMigrateDB() error {
 
 	err = conn.AutoMigrate(
 		&models.Airplane{},
-		&models.Airplane{},
+		&models.Airline{},
 		&models.Airport{},
 		&models.City{},
 		&models.Flight{},
