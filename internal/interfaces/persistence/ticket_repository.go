@@ -126,6 +126,9 @@ func (a *TicketRepository) GetByUserId(userId uint) (*[]domain.Ticket, error) {
 		Where("user_id = ?", userId).
 		Where("Refund = ?", false).
 		Where("flights.departure_time > ?", time.Now()).
+		Preload("Passenger").
+		Preload("Flight.Departure").
+		Preload("Flight.Destination").
 		Find(&tickets)
 
 	if tx.Error != nil {
