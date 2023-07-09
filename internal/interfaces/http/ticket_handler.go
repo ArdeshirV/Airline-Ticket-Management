@@ -71,7 +71,7 @@ func (th *TicketHandler) GetReservedUsers(c echo.Context) error {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "can not read the ticket data"})
 	}
 	tickets, err := th.booking.GetReservedTickets(uint(atoi))
-	if err == nil {
+	if err != nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "can not read the ticket data"})
 	}
 
