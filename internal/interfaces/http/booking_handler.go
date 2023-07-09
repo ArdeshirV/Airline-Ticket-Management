@@ -42,10 +42,12 @@ func (b *BookingHandler) Book(c echo.Context) error {
 	if request.FlightID == 0 || len(request.PassengerIDs) == 0 {
 		return c.JSON(http.StatusBadRequest, BookingError{Message: "Missing required fields"})
 	}
-	userId := c.Get("session").(*sessions.Session).Values["userID"].(int)
-	if userId == 0 {
+	value, ok := c.Get("session").(*sessions.Session).Values["userID"]
+	if !ok {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
+	userId := int(value.(uint))
+	println("UID:", userId)
 	orderID, err := b.booking.Book(request.FlightID, request.PassengerIDs, userId)
 	if err != nil {
 		switch err.(type) {
@@ -70,10 +72,11 @@ func (b *BookingHandler) Finalize(c echo.Context) error {
 	if request.OrderID == 0 {
 		return c.JSON(http.StatusBadRequest, BookingError{Message: "Missing required fields"})
 	}
-	userId := c.Get("session").(*sessions.Session).Values["userID"].(int)
-	if userId == 0 {
+	value, ok := c.Get("session").(*sessions.Session).Values["userID"]
+	if !ok {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
+	userId := int(value.(uint))
 
 	err = b.booking.Finalize(request.OrderID, userId)
 	if err != nil {
