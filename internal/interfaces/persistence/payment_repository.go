@@ -50,7 +50,7 @@ func (a PaymentRepositoryImp) Get(id int) (*domain.Payment, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
 
-	checkTicketExist := db.Debug().Where(&payment, "ID = ?", id)
+	checkTicketExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkTicketExist.First(&payment)
 
