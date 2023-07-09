@@ -40,7 +40,7 @@ type ReserveResponse struct {
 }
 
 func GetAirlineLogoByName(name string) (string, error) {
-	url := fmt.Sprintf(APIGetLogo, config.Config.Mock.Port, string(name))
+	url := fmt.Sprintf(APIGetLogo, config.Config.Mock.Port, name)
 	res, err := http.Get(url)
 	if err != nil {
 		return "", err
