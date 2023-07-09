@@ -46,7 +46,7 @@ func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&ticket)
 
-	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", id)
+	checkTicketExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkTicketExist.First(&ticket)
 
@@ -92,8 +92,8 @@ func (a *TicketRepository) GetAllNotArrivedByUserId() (*[]domain.Ticket, error) 
 
 	err := db.Table("tickets").
 		Select("*").InnerJoins("inner join flights on tickets.FlightID = flights.ID").
-		Where(&tickets, "Refund = ?", false).
-		Where(&tickets, "flights.DepartureTime > ?", time.Now()).
+		Where("Refund = ?", false).
+		Where("flights.DepartureTime > ?", time.Now()).
 		Scan(&tickets).Error
 
 	if err != nil {

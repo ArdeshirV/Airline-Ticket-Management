@@ -43,7 +43,7 @@ func (a *AirportRepository) Get(id int) (*domain.Airport, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&airport)
 
-	checkAirportExist := db.Debug().Where(&airport, "ID = ?", id)
+	checkAirportExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkAirportExist.First(&airport)
 
