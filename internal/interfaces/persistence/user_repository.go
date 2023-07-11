@@ -112,7 +112,7 @@ func (ur *UserRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&user)
-	deleted := db.Debug().Delete(user).Commit()
+	deleted := db.Debug().Delete(user)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

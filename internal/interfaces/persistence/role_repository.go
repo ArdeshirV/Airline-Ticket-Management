@@ -100,7 +100,7 @@ func (a *RoleRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&role)
-	deleted := db.Debug().Delete(role).Commit()
+	deleted := db.Debug().Delete(role)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

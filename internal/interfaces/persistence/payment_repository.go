@@ -82,7 +82,7 @@ func (a PaymentRepositoryImp) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&payment)
-	deleted := db.Debug().Delete(payment).Commit()
+	deleted := db.Debug().Delete(payment)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

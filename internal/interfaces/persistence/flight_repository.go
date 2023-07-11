@@ -78,7 +78,7 @@ func (a FlightRepositoryImp) Delete(id int) error {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&flight)
 
-	deleted := db.Debug().Delete(flight).Commit()
+	deleted := db.Debug().Delete(flight)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

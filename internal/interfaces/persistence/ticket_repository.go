@@ -78,7 +78,7 @@ func (a *TicketRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&ticket)
-	deleted := db.Debug().Delete(ticket).Commit()
+	deleted := db.Debug().Delete(ticket)
 	if deleted.Error != nil {
 		return deleted.Error
 	}
