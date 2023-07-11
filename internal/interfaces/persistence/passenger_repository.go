@@ -88,8 +88,7 @@ func (a PassengerRepositoryImp) Delete(id int) error {
 		return err
 	}
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&passenger)
-	deleted := db.Debug().Delete(passenger).Commit()
+	deleted := db.Debug().Delete(passenger)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

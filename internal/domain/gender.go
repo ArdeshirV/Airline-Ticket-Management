@@ -1,20 +1,8 @@
 package domain
 
-type Gender int
+type Gender string
 
 const (
-	Male Gender = iota
-	Female
+	Male   Gender = "Male"
+	Female Gender = "Female"
 )
-
-func (data Gender) String() (result string) {
-	switch data {
-	case Male:
-		result = "Male"
-	case Female:
-		result = "Female"
-	default:
-		result = "Unknown"
-	}
-	return result
-}

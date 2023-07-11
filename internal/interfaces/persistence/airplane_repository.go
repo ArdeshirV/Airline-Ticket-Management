@@ -67,7 +67,7 @@ func (r AirplaneRepositoryImpl) Delete(id int) error {
 		return err
 	}
 	db, _ := database.GetDatabaseConnection()
-	deleted := db.Debug().Delete(airplane).Commit()
+	deleted := db.Debug().Delete(airplane)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

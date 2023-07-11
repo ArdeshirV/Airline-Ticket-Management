@@ -75,7 +75,7 @@ func (a *AirportRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&airport)
-	deleted := db.Debug().Delete(airport).Commit()
+	deleted := db.Debug().Delete(airport)
 	if deleted.Error != nil {
 		return deleted.Error
 	}
