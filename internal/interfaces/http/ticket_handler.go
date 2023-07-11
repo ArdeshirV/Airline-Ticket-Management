@@ -42,17 +42,15 @@ func (th *TicketHandler) Cancel(c echo.Context) error {
 	if strconv.Itoa(request.TicketId) == "" {
 		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "Missing required fields"})
 	}
-
 	ticket, err := th.booking.CancelTicket(request.TicketId)
-	if err == nil {
+	if err != nil {
+		println("1")
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "cancellation failed"})
 	}
-
 	err = th.flightUseCase.IncreaseFlightCapacity(&ticket.Flight)
-	if err == nil {
+	if err != nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "cancellation failed"})
 	}
-
 	return c.JSON(http.StatusOK, MassageResponse{Message: "Cancelled Successfully"})
 }
 

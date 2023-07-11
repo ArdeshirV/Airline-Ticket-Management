@@ -46,7 +46,7 @@ func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&ticket)
 
-	checkTicketExist := db.Debug().Where("ID = ?", id)
+	checkTicketExist := db.Debug().Preload("Flight").Where("ID = ?", id)
 
 	tx := checkTicketExist.First(&ticket)
 
