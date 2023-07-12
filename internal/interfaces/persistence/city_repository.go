@@ -10,7 +10,7 @@ import (
 type CityRepository struct {
 }
 
-func (a *CityRepository) New() *CityRepository {
+func NewCityRepository() *CityRepository {
 	return &CityRepository{}
 }
 
