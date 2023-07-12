@@ -75,7 +75,7 @@ func (a *CityRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&city)
-	deleted := db.Debug().Delete(city).Commit()
+	deleted := db.Debug().Delete(city)
 	if deleted.Error != nil {
 		return deleted.Error
 	}
