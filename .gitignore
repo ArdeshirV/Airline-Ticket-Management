@@ -31,6 +31,5 @@ final-project.exe
 
 # Temporary ticket PDF file
 ticket.pdf
-pdf/*
 pdf/ticket.pdf
 pdf/airline_logo.png

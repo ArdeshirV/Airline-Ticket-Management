@@ -67,7 +67,6 @@ func UpdatePassenger(c echo.Context) error {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
 	msg := fmt.Sprintf("passenger with ID:%d updated", passengerID)
-	println("Hey:", msg)
 	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 

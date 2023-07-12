@@ -31,23 +31,6 @@ func TestAddPassenger(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-
 	err := AddPassenger(c)
-
 	assert.NoError(t, err)
-	/*assert.Equal(t, http.StatusOK, rec.Code)
-
-	expectedResponse := `{"message":"Passenger added successfully","passengerId":1}`
-	 assert.Equal(t, expectedResponse, rec.Body.String())
-
-	assert.Len(t, passengers, 1)
-	assert.Equal(t, uint(1), passengers[0].ID)
-	assert.Equal(t, "Akbar", passengers[0].FirstName)
-	assert.Equal(t, "Akbari", passengers[0].LastName)
-	assert.Equal(t, "1234567890", passengers[0].NationalCode)
-	assert.Equal(t, "akbar.akbari@example.com", passengers[0].Email)
-	assert.Equal(t, "male", passengers[0].Gender)
-	assert.Equal(t, "1990-01-01", passengers[0].BirthDate)
-	assert.Equal(t, "1234567890", passengers[0].Phone)
-	assert.Equal(t, "123 Example Street", passengers[0].Address)*/
 }
