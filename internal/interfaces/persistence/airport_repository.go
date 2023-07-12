@@ -10,7 +10,7 @@ import (
 type AirportRepository struct {
 }
 
-func (a *AirportRepository) New() *AirportRepository {
+func NewAirportRepository() *AirportRepository {
 	return &AirportRepository{}
 }
 
