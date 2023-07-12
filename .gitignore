@@ -23,6 +23,8 @@ go.work
 # Executable files
 main
 main.exe
+final-project
+final-project.exe
 
 # Ignore vscode configs
 .vscode
