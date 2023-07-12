@@ -18,12 +18,13 @@ func PassengerRoute(e *echo.Echo) {
 }
 
 func AddPassenger(c echo.Context) error {
-	var passenger *domain.Passenger
-	if err := c.Bind(passenger); err != nil {
+	var passenger domain.Passenger
+	err := c.Bind(&passenger)
+	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
 	pr := persistence.NewPassengerRepository()
-	if _, err := pr.Create(passenger); err != nil {
+	if _, err := pr.Create(&passenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
 	msg := fmt.Sprintf("passenger with ID:%d added", passenger.ID)
@@ -56,15 +57,17 @@ func UpdatePassenger(c echo.Context) error {
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
-	var updatedPassenger *domain.Passenger
-	if err := c.Bind(updatedPassenger); err != nil {
+	var updatedPassenger domain.Passenger
+	err = c.Bind(&updatedPassenger)
+	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
 	pr := persistence.NewPassengerRepository()
-	if _, err := pr.Update(updatedPassenger); err != nil {
+	if _, err := pr.Update(&updatedPassenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
 	msg := fmt.Sprintf("passenger with ID:%d updated", passengerID)
+	println("Hey:", msg)
 	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 
