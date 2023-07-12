@@ -93,6 +93,17 @@ func GetTicketData(id int) (string, string, [][]string, error) {
 		{"Gender", fmt.Sprintf("%v", passenger.Gender)},
 		{"Birthday", passenger.BirthDate.Format(birthdayLayout)},
 		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
+		{"", ""},
 		{"Flight No", flight.FlightNo},
 		{"Flight Class", fmt.Sprintf("%v", flight.FlightClass)},
 		{"Airline", airline.Name},
@@ -104,6 +115,8 @@ func GetTicketData(id int) (string, string, [][]string, error) {
 		{"Arrival Time", flight.ArrivalTime.Format(dateTimeLayout)},
 		{"Price", fmt.Sprintf("%v", flight.Price)},
 	}
+	ShowValue("title", title)
+	ShowValue("contents", contents)
 	return title, airline.Logo, contents, err
 }
 
