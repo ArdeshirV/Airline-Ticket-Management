@@ -23,10 +23,12 @@ go.work
 # Executable files
 main
 main.exe
+final-project
+final-project.exe
 
 # Ignore vscode configs
 .vscode
 
 # Temporary ticket PDF file
 ticket.pdf
-pdf/ticket.pdf
+pdf/*
