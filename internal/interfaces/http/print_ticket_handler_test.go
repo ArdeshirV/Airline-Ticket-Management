@@ -18,7 +18,7 @@ func TestPrintTicketHandler(t *testing.T) {
 	test.SetupWithData()  // Load fake data into DB
 	defer test.Teardown() // Clear fake data from DB
 	e := echo.New()
-	ticketID := "1"
+	ticketID := "100"
 	req := httptest.NewRequest(http.MethodGet, "/print_ticket?ticketid="+ticketID, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
