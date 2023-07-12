@@ -109,5 +109,7 @@ func GetTicketData(id int) (string, string, [][]string, error) {
 }
 
 func ShowValue(title string, value interface{}) {
-	fmt.Printf("  %s: \033[1;33m%v\033[0;0m\n", title, value)
+	if config.IsDebugMode() {
+		fmt.Printf("  %s: \033[1;33m%v\033[0;0m\n", title, value)
+	}
 }
