@@ -14,6 +14,7 @@ type PassengerRepository interface {
 	GetAll() (*[]domain.Passenger, error)
 	GetList(IDs []int) ([]domain.Passenger, error)
 	Delete(id int) error
+	GetByUserId(id int) (*[]domain.Passenger, error)
 }
 
 type PassengerRepositoryImp struct {
@@ -52,6 +53,19 @@ func (a PassengerRepositoryImp) Get(id int) (*domain.Passenger, error) {
 	db, _ := database.GetDatabaseConnection()
 
 	tx := db.First(&passenger, id)
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &passenger, nil
+}
+
+func (a PassengerRepositoryImp) GetByUserId(id int) (*[]domain.Passenger, error) {
+	var passenger []domain.Passenger
+	db, _ := database.GetDatabaseConnection()
+
+	tx := db.Where("user_id = ?", id).Find(&passenger)
 
 	if err := tx.Error; err != nil {
 		return nil, err

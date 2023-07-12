@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
@@ -12,7 +13,7 @@ import (
 
 func PassengerRoute(e *echo.Echo) {
 	e.POST("/passengers", AddPassenger)
-	e.GET("/passengers/:id", GetPassenger)
+	e.GET("/passengers", GetPassengers)
 	e.PUT("/passengers/:id", UpdatePassenger)
 	e.DELETE("/passengers/:id", DeletePassenger)
 }
@@ -70,17 +71,15 @@ func UpdatePassenger(c echo.Context) error {
 	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 
-func GetPassenger(c echo.Context) error {
-	id := c.Param("id")
-	if id == "" {
-		return echoStringAsJSON(c, http.StatusBadRequest, "the parameter 'id' is required")
+func GetPassengers(c echo.Context) error {
+	value, ok := c.Get("session").(*sessions.Session).Values["userID"]
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
-	passengerID, err := strconv.Atoi(id)
-	if err != nil {
-		return echoErrorAsJSON(c, http.StatusBadRequest, err)
-	}
+	userId := int(value.(uint))
+	println("UID:", userId)
 	pr := persistence.NewPassengerRepository()
-	response, err := pr.Get(passengerID)
+	response, err := pr.GetByUserId(userId)
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
