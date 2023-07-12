@@ -95,7 +95,6 @@ func GetTicketData(id int) (string, string, [][]string, error) {
 		{"", ""},
 		{"Flight No", flight.FlightNo},
 		{"Flight Class", fmt.Sprintf("%v", flight.FlightClass)},
-		{"Seat No" /*ticket.X*/, "7"},
 		{"Airline", airline.Name},
 		{"Departure City", departureCity.Name},
 		{"Departure Airport", departure.Name},
