@@ -18,5 +18,5 @@ type Passenger struct {
 	Address      string    `json:"address"`
 	User         User      `json:"user" gorm:"foreignKey:UserID;references:ID"`
 	UserID       uint
-	Tickets      []Ticket  `json:"tickets"`
+	Tickets      []Ticket `json:"tickets"`
 }
