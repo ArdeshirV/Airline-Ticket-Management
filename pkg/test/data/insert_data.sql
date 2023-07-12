@@ -66,8 +66,8 @@ insert into users  (id,username,password,email,phone,role_id,created_at)
  ------------------------------------------------------------------
 insert into passengers  (id,first_name,last_name,national_code,gender,birth_date,user_id,created_at,updated_at)
 	values
-	(401,'Mohammad','Behjoo','9876543210',0,'2000-06-16',10,NOW(),NOW()),
-	(402,'Ehsan','Rezvani','1234567890',0,'2001-06-16',10,NOW(),NOW());
+	(401,'Mohammad','Behjoo','9876543210','Male','2000-06-16',10,NOW(),NOW()),
+	(402,'Ehsan','Rezvani','1234567890','Male','2001-06-16',10,NOW(),NOW());
 ------------------------------------------------------------
 insert into orders (id,order_num,amount,flight_id,status,user_id,created_at,updated_at)
 	values
