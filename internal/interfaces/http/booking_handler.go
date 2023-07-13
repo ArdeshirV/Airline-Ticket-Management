@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/usecase"
 )
@@ -25,11 +24,12 @@ type FainalizeRequest struct {
 	OrderID int
 }
 type BookingHandler struct {
-	booking *usecase.Booking
+	booking     *usecase.Booking
+	userHandler UserHandler
 }
 
-func NewBookingHandler(booking *usecase.Booking) *BookingHandler {
-	return &BookingHandler{booking: booking}
+func NewBookingHandler(booking *usecase.Booking, userHandler UserHandler) *BookingHandler {
+	return &BookingHandler{booking: booking, userHandler: userHandler}
 }
 
 func (b *BookingHandler) Book(c echo.Context) error {
@@ -42,13 +42,11 @@ func (b *BookingHandler) Book(c echo.Context) error {
 	if request.FlightID == 0 || len(request.PassengerIDs) == 0 {
 		return c.JSON(http.StatusBadRequest, BookingError{Message: "Missing required fields"})
 	}
-	value, ok := c.Get("session").(*sessions.Session).Values["userID"]
-	if !ok {
+	user, err := b.userHandler.GetUserFromSession(c)
+	if err != nil {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
-	userId := int(value.(uint))
-	println("UID:", userId)
-	orderID, err := b.booking.Book(request.FlightID, request.PassengerIDs, userId)
+	orderID, err := b.booking.Book(request.FlightID, request.PassengerIDs, int(user.ID))
 	if err != nil {
 		switch err.(type) {
 		case usecase.FlightNotFound:
@@ -72,13 +70,12 @@ func (b *BookingHandler) Finalize(c echo.Context) error {
 	if request.OrderID == 0 {
 		return c.JSON(http.StatusBadRequest, BookingError{Message: "Missing required fields"})
 	}
-	value, ok := c.Get("session").(*sessions.Session).Values["userID"]
-	if !ok {
+	user, err := b.userHandler.GetUserFromSession(c)
+	if err != nil {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
-	userId := int(value.(uint))
 
-	err = b.booking.Finalize(request.OrderID, userId)
+	err = b.booking.Finalize(request.OrderID, int(user.ID))
 	if err != nil {
 		switch err.(type) {
 		case usecase.OrderNotFound:

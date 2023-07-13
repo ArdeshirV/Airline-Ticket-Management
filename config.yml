@@ -19,7 +19,7 @@ jwttoken:
 encryption:
   secretkey: Wdn29o32sxQAS2qsQmjs23dx8s
 payment:
-  redirecturl: http://localhost:8080/payment/callback
+  redirecturl: http://127.0.0.1:8080/payment/callback
   gateways:
     saderat:
       terminalid: 134754392

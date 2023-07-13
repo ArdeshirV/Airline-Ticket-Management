@@ -109,5 +109,6 @@ func (b Booking) Finalize(orderID int, userId int) error {
 	if err != nil {
 		return err
 	}
+	// TODO: reduce the flight capcity from mock api
 	return nil
 }
