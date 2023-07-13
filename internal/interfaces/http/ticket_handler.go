@@ -59,18 +59,12 @@ func (th *TicketHandler) Cancel(c echo.Context) error {
 func (th *TicketHandler) GetReservedUsers(c echo.Context) error {
 
 	// Check the body data
-	userId := c.QueryParam("userId")
-	println(userId)
-	if userId == "0" || userId == "" {
-		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "Invalid body request"})
-
+	user := c.Get("user").(domain.User)
+	if user.ID == 0 || user.Username == "" {
+		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "login first"})
 	}
 
-	atoi, err := strconv.Atoi(userId)
-	if err != nil {
-		return c.JSON(http.StatusConflict, MassageResponse{Message: "can not read the ticket data"})
-	}
-	tickets, err := th.booking.GetReservedTickets(uint(atoi))
+	tickets, err := th.booking.GetReservedTickets(uint(user.ID))
 	if err == nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "can not read the ticket data"})
 	}

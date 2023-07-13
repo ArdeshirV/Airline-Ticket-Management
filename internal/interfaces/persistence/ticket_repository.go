@@ -124,7 +124,7 @@ func (a *TicketRepository) GetByUserId(userId uint) (*[]domain.Ticket, error) {
 		Table("tickets").
 		Joins("join flights on tickets.flight_id = flights.id").
 		Where("user_id = ?", userId).
-		Where("Refund = ?", false).
+		Where("refund = ?", false).
 		Where("flights.departure_time > ?", time.Now()).
 		Find(&tickets)
 

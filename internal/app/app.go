@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	customMiddleware "github.com/the-go-dragons/final-project/internal/app/middleware"
 	handlers "github.com/the-go-dragons/final-project/internal/interfaces/http"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 	"github.com/the-go-dragons/final-project/internal/usecase"
@@ -89,7 +90,7 @@ func routing(e *echo.Echo) {
 	e.POST("/booking/book", BookingHandler.Book)
 	e.POST("/booking/finalize", BookingHandler.Finalize)
 
-	e.GET("/reserved", TicketHandler.GetReservedUsers)
+	e.GET("/reserved", TicketHandler.GetReservedUsers, customMiddleware.RequireAuth)
 	e.POST("/cancel", TicketHandler.Cancel)
 }
 
