@@ -52,7 +52,7 @@ func (r AirplaneRepositoryImpl) Get(id int) (*domain.Airplane, error) {
 	var airplane domain.Airplane
 	db, _ := database.GetDatabaseConnection()
 
-	tx := db.Debug().Where(&airplane, "ID = ?", id).First(&airplane)
+	tx := db.Debug().Where("ID = ?", id).First(&airplane)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (r AirplaneRepositoryImpl) Delete(id int) error {
 		return err
 	}
 	db, _ := database.GetDatabaseConnection()
-	deleted := db.Debug().Delete(airplane).Commit()
+	deleted := db.Debug().Delete(airplane)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

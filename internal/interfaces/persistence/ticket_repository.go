@@ -46,7 +46,7 @@ func (a *TicketRepository) Get(id int) (*domain.Ticket, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&ticket)
 
-	checkTicketExist := db.Debug().Where(&ticket, "ID = ?", id)
+	checkTicketExist := db.Debug().Preload("Flight").Where("ID = ?", id)
 
 	tx := checkTicketExist.First(&ticket)
 
@@ -78,7 +78,7 @@ func (a *TicketRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&ticket)
-	deleted := db.Debug().Delete(ticket).Commit()
+	deleted := db.Debug().Delete(ticket)
 	if deleted.Error != nil {
 		return deleted.Error
 	}
@@ -92,8 +92,8 @@ func (a *TicketRepository) GetAllNotArrivedByUserId() (*[]domain.Ticket, error) 
 
 	err := db.Table("tickets").
 		Select("*").InnerJoins("inner join flights on tickets.FlightID = flights.ID").
-		Where(&tickets, "Refund = ?", false).
-		Where(&tickets, "flights.DepartureTime > ?", time.Now()).
+		Where("Refund = ?", false).
+		Where("flights.DepartureTime > ?", time.Now()).
 		Scan(&tickets).Error
 
 	if err != nil {
@@ -126,6 +126,9 @@ func (a *TicketRepository) GetByUserId(userId uint) (*[]domain.Ticket, error) {
 		Where("user_id = ?", userId).
 		Where("refund = ?", false).
 		Where("flights.departure_time > ?", time.Now()).
+		Preload("Passenger").
+		Preload("Flight.Departure").
+		Preload("Flight.Destination").
 		Find(&tickets)
 
 	if tx.Error != nil {

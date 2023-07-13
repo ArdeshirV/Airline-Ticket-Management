@@ -2,8 +2,6 @@ package persistence
 
 import (
 	"errors"
-	"net/http"
-	"strconv"
 
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/database"
@@ -30,11 +28,7 @@ func (rr *RoleRepository) GetById(id int) (*domain.Role, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&role)
 
-	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
-
-	if checkRoleExist.RowsAffected <= 0 {
-		return &role, errors.New(strconv.Itoa(http.StatusNotFound))
-	}
+	checkRoleExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkRoleExist.Find(&role)
 
@@ -74,7 +68,7 @@ func (a *RoleRepository) Get(id int) (*domain.Role, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&role)
 
-	checkRoleExist := db.Debug().Where(&role, "ID = ?", id)
+	checkRoleExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkRoleExist.First(&role)
 
@@ -106,7 +100,7 @@ func (a *RoleRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&role)
-	deleted := db.Debug().Delete(role).Commit()
+	deleted := db.Debug().Delete(role)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

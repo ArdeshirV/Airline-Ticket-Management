@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
@@ -32,6 +33,8 @@ func NewApp() *App {
 }
 
 func (application *App) Start(portAddress int) error {
+	application.e.Server.ReadTimeout = 5 * time.Second
+	application.e.Server.WriteTimeout = 5 * time.Second
 	err := application.e.Start(fmt.Sprintf(":%d", portAddress))
 	application.e.Logger.Fatal(err)
 	return err

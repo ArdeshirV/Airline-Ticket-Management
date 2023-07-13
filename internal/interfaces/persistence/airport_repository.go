@@ -10,7 +10,7 @@ import (
 type AirportRepository struct {
 }
 
-func (a *AirportRepository) New() *AirportRepository {
+func NewAirportRepository() *AirportRepository {
 	return &AirportRepository{}
 }
 
@@ -43,7 +43,7 @@ func (a *AirportRepository) Get(id int) (*domain.Airport, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&airport)
 
-	checkAirportExist := db.Debug().Where(&airport, "ID = ?", id)
+	checkAirportExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkAirportExist.First(&airport)
 
@@ -75,7 +75,7 @@ func (a *AirportRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&airport)
-	deleted := db.Debug().Delete(airport).Commit()
+	deleted := db.Debug().Delete(airport)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

@@ -40,7 +40,7 @@ type ReserveResponse struct {
 }
 
 func GetAirlineLogoByName(name string) (string, error) {
-	url := fmt.Sprintf(APIGetLogo, config.Config.Mock.Port, string(name))
+	url := fmt.Sprintf(APIGetLogo, config.Config.Mock.Port, name)
 	res, err := http.Get(url)
 	if err != nil {
 		return "", err
@@ -65,7 +65,7 @@ func SetRemainingCapacity(flightNo string, cmd command) (resp *ReserveResponse, 
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -80,7 +80,7 @@ func GetFlightsFromA2B(timeD, cityA, cityB string) (flights []models.Flight, err
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -95,7 +95,7 @@ func GetFlightsByFlightNo(flightNo string) (flight []models.Flight, err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -109,7 +109,7 @@ func GetAirplanes() (airplanes []models.Airplane, err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -123,7 +123,7 @@ func GetFlights() (flights []models.Flight, err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -137,7 +137,7 @@ func GetCities() (cities []models.City, err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -151,7 +151,7 @@ func GetDepartureDates() (times []time.Time, err error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = json.Unmarshal([]byte(JSONResponse), &data)
+	err = json.Unmarshal([]byte(JSONResponse), data)
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -14,7 +14,9 @@ type PassengerRepository interface {
 	GetAll() (*[]domain.Passenger, error)
 	GetList(IDs []int) ([]domain.Passenger, error)
 	Delete(id int) error
+	GetByUserId(id int) (*[]domain.Passenger, error)
 }
+
 type PassengerRepositoryImp struct {
 }
 
@@ -49,11 +51,21 @@ func (a PassengerRepositoryImp) Update(input *domain.Passenger) (*domain.Passeng
 func (a PassengerRepositoryImp) Get(id int) (*domain.Passenger, error) {
 	var passenger domain.Passenger
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&passenger)
 
-	checkPassengerExist := db.Debug().Where(&passenger, "ID = ?", id)
+	tx := db.First(&passenger, id)
 
-	tx := checkPassengerExist.First(&passenger)
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	return &passenger, nil
+}
+
+func (a PassengerRepositoryImp) GetByUserId(id int) (*[]domain.Passenger, error) {
+	var passenger []domain.Passenger
+	db, _ := database.GetDatabaseConnection()
+
+	tx := db.Where("user_id = ?", id).Find(&passenger)
 
 	if err := tx.Error; err != nil {
 		return nil, err
@@ -90,8 +102,7 @@ func (a PassengerRepositoryImp) Delete(id int) error {
 		return err
 	}
 	db, _ := database.GetDatabaseConnection()
-	db = db.Model(&passenger)
-	deleted := db.Debug().Delete(passenger).Commit()
+	deleted := db.Debug().Delete(passenger)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

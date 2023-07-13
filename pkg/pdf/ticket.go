@@ -28,27 +28,30 @@ func CreatePDF(pdfFileName, heading string, logo string, data [][]string) error 
 func buildHeading(m pdf.Maroto, heading string, imageLogo string) (err error) {
 	m.RegisterHeader(func() {
 		m.Row(40, func() {
-			m.Col(12, func() {
+			m.Col(4, func() {
 				err = m.FileImage(imageLogo, props.Rect{
+					Percent: 250,
 					Center:  true,
-					Percent: 75,
+				})
+			})
+			m.Col(4, func() {
+				m.QrCode(heading, props.Rect{
+					Percent: 100,
+					Center:  true,
+				})
+			})
+			m.Col(4, func() {
+				_ = m.Barcode(heading, props.Barcode{
+					Percent:    200,
+					Proportion: props.Proportion{Width: 50, Height: 10},
+					Center:     true,
 				})
 			})
 		})
 	})
 	if err != nil {
-		return errors.New(fmt.Sprintf("failed to load '%s' image in PDF", imageLogo))
+		return fmt.Errorf("failed to load '%s' image in PDF", imageLogo)
 	}
-	m.Row(20, func() {
-		m.Col(12, func() {
-			m.QrCode(heading, props.Rect{
-				Left:    0,
-				Top:     5,
-				Center:  true,
-				Percent: 200,
-			})
-		})
-	})
 	m.Row(10, func() {
 		m.Col(12, func() {
 			m.Text(heading, props.Text{

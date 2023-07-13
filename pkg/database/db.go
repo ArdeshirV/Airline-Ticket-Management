@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
-	pg "github.com/golang-migrate/migrate/v4/database/postgres"
+	models "github.com/the-go-dragons/final-project/internal/domain"
+
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/pkg/config"
@@ -94,26 +94,53 @@ func CloseDBConnection(conn *gorm.DB) {
 
 func AutoMigrateDB() error {
 	conn, err := GetDatabaseConnection()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sqlDB, err := conn.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = conn.AutoMigrate(
+		&models.Airplane{},
+		&models.Airline{},
+		&models.Airport{},
+		&models.City{},
+		&models.Flight{},
+		&models.Order{},
+		&models.OrderItem{},
+		&models.Passenger{},
+		&models.Payment{},
+		&models.Role{},
+		&models.Ticket{},
+		&models.User{},
+	)
 
-	driver, err := pg.WithInstance(sqlDB, &pg.Config{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	migrate, err := migrate.NewWithDatabaseInstance(
-		"file://./pkg/database/migrations",
-		"postgres", driver)
-	if err != nil {
-		log.Fatal(err)
-	}
-	migrate.Up()
 	return err
+
+	/*
+		// using go migrate
+
+			conn, err := GetDatabaseConnection()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			sqlDB, err := conn.DB()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			driver, err := pg.WithInstance(sqlDB, &pg.Config{})
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			migrate, err := migrate.NewWithDatabaseInstance(
+				"file://./pkg/database/migrations",
+				"postgres", driver)
+			if err != nil {
+				log.Fatal(err)
+			}
+			migrate.Up()
+			return err
+	*/
 }

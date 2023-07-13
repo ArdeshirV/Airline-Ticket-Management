@@ -10,7 +10,7 @@ import (
 type CityRepository struct {
 }
 
-func (a *CityRepository) New() *CityRepository {
+func NewCityRepository() *CityRepository {
 	return &CityRepository{}
 }
 
@@ -43,7 +43,7 @@ func (a *CityRepository) Get(id int) (*domain.City, error) {
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&city)
 
-	checkCityExist := db.Debug().Where(&city, "ID = ?", id)
+	checkCityExist := db.Debug().Where("ID = ?", id)
 
 	tx := checkCityExist.First(&city)
 
@@ -75,7 +75,7 @@ func (a *CityRepository) Delete(id int) error {
 	}
 	db, _ := database.GetDatabaseConnection()
 	db = db.Model(&city)
-	deleted := db.Debug().Delete(city).Commit()
+	deleted := db.Debug().Delete(city)
 	if deleted.Error != nil {
 		return deleted.Error
 	}

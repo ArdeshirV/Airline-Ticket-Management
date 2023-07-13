@@ -23,6 +23,8 @@ go.work
 # Executable files
 main
 main.exe
+final-project
+final-project.exe
 
 # Ignore vscode configs
 .vscode
@@ -30,3 +32,4 @@ main.exe
 # Temporary ticket PDF file
 ticket.pdf
 pdf/ticket.pdf
+pdf/airline_logo.png

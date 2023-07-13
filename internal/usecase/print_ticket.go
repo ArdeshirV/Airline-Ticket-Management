@@ -2,38 +2,117 @@ package usecase
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 	"github.com/the-go-dragons/final-project/pkg/config"
+	"github.com/the-go-dragons/final-project/pkg/mock_api"
 	"github.com/the-go-dragons/final-project/pkg/pdf"
 )
 
+const (
+	paid           = "paid"
+	birthdayLayout = "2006/01/02"
+	dateTimeLayout = "2006/01/02 15:04"
+)
+
 func CreateTicketAsPDF(id int, TicketFileName string) error {
-	title, data, err := GetTicketData(id)
+	title, logoName, data, err := GetTicketData(id)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("\n\033[0mtitle = %v\ndata = %v\033[0m\n\n", title, data)
-	// TODO: Use --> func GetAirlineLogoByName(name string) (string, error)
-	return pdf.CreatePDF(TicketFileName, title, config.Config.App.ImageLogo, data)
+	logoFile, err := mock_api.GetAirlineLogoByName(logoName)
+	if err != nil {
+		logoFile = config.Config.App.ImageLogo
+	}
+	return pdf.CreatePDF(TicketFileName, title, logoFile, data)
 }
 
-func GetTicketData(id int) (title string, contents [][]string, err error) {
-	err = nil
-	title = "The Go Dragons - Team 3 of Quera Software Engineering Bootcamp"
-	tr := persistence.NewTicketRepository()
-	//tickets, err := tr.GetAll()
-	ticket, err := tr.Get(id)
+func GetTicketData(id int) (string, string, [][]string, error) {
+	ticketRepo := persistence.NewTicketRepository()
+	ticket, err := ticketRepo.Get(id)
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
-	contents = [][]string{
-		{"First Name", ticket.Passenger.FirstName}, {"Flight No", ticket.Flight.FlightNo},
-		{"Last Name", ticket.Passenger.LastName}, {"Departure", ticket.Flight.Departure.Name}, {"Price", "10"},
-		{"National Code", ticket.Passenger.NationalCode}, {"Destination", ticket.Flight.Destination.Name}, {"Price", "10"},
-		{"Gender", fmt.Sprintf("%v", ticket.Passenger.Gender)}, {"Terminal", ticket.Flight.Departure.Terminal}, {"Price", "10"},
-		{"Birthday", ticket.Passenger.BirthDate.Format("2006/01/02")}, {"Flight Class", fmt.Sprintf("%v", ticket.Flight.FlightClass)}, {"Price", "10"},
+	if strings.ToLower(strings.TrimSpace(ticket.PaymentStatus)) != paid {
+		err = fmt.Errorf("the ticket price with ID:%v has not been paid yet", ticket.ID)
+		return "", "", nil, err
 	}
-	fmt.Printf("\n\n\033[0;36m%v\033[0m\n\n", contents) // DEBUG
-	return title, contents, err
+	flightRepo := persistence.NewFlightRepository()
+	flight, err := flightRepo.Get(int(ticket.FlightID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	passengerRepo := persistence.NewPassengerRepository()
+	passenger, err := passengerRepo.Get(int(ticket.PassengerID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	airplaneRepo := persistence.NewAirplaneRepository()
+	airplane, err := airplaneRepo.Get(int(flight.AirplaneID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	airlineRepo := persistence.NewAirlineRepsoitory()
+	airline, err := airlineRepo.Get(int(airplane.AirlineID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	airportRepo := persistence.NewAirportRepository()
+	departure, err := airportRepo.Get(int(flight.DepartureID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	destination, err := airportRepo.Get(int(flight.DestinationID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	cityRepo := persistence.NewCityRepository()
+	departureCity, err := cityRepo.Get(int(departure.CityID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	destinationCity, err := cityRepo.Get(int(destination.CityID))
+	if err != nil {
+		return "", "", nil, err
+	}
+	title := fmt.Sprintf("Airline: %v, Flights No: %v, %v %v, NC %v",
+		airline.Name,
+		flight.FlightNo,
+		passenger.FirstName,
+		passenger.LastName,
+		passenger.NationalCode)
+	contents := [][]string{
+		{"First Name", passenger.FirstName},
+		{"Last Name", passenger.LastName},
+		{"National Code", passenger.NationalCode},
+		//{"Gender", fmt.Sprintf("%v", passenger.Gender)},
+		//{"Birthday", passenger.BirthDate.Format(birthdayLayout)},
+		//{"Phone", passenger.Phone},
+		//{"Email", passenger.Email},
+		//{"Address", passenger.Address},
+		{"", ""},
+		{"Flight No", flight.FlightNo},
+		{"Departure/Destination", fmt.Sprintf("%v --> %v", departureCity.Name, destinationCity.Name)},
+		{"Class", fmt.Sprintf("%v", flight.FlightClass)},
+		{"Departure Time", flight.DepartureTime.Format(dateTimeLayout)},
+		//{"Arrival Time", flight.ArrivalTime.Format(dateTimeLayout)},
+		//{"Remaining Capacity", fmt.Sprintf("%v", flight.RemainingCapacity)},
+		//{"", airline.Name},
+		//{"", airline.Logo},
+		{"Departure Airport", departure.Name},
+		{"Destination Airport", destination.Name},
+		//{"Terminal", departure.Terminal},
+		//{"Cancel Condition", flight.CancelCondition},
+		{"Price", fmt.Sprintf("%v", flight.Price)},
+	}
+	//ShowValue("title", title)
+	//ShowValue("contents", contents)
+	return title, airline.Logo, contents, err
+}
+
+func ShowValue(title string, value interface{}) {
+	if config.IsDebugMode() {
+		fmt.Printf("  %s: \033[1;33m%v\033[0;0m\n", title, value)
+	}
 }
