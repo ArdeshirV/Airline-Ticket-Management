@@ -20,7 +20,8 @@ type LoginRequest struct {
 }
 
 type LoginResult struct {
-	Token string `json:"token"`
+	Token  string `json:"token"`
+	UserID int    `json:"userid"`
 }
 
 type Response struct {
@@ -90,7 +91,8 @@ func (uh *UserHandler) Login(c echo.Context) error {
 		}
 
 		result := &LoginResult{
-			Token: token,
+			Token:  token,
+			UserID: int(user.ID),
 		}
 
 		// update IsLoginRequired field
