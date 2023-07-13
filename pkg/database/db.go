@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	models "github.com/the-go-dragons/final-project/internal/domain"
 	"log"
 	"time"
 
@@ -56,23 +55,6 @@ func CreateDBConnection() error {
 
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	err = db.AutoMigrate(
-		&models.Airplane{},
-		&models.Airplane{},
-		&models.Airport{},
-		&models.City{},
-		&models.Flight{},
-		&models.Order{},
-		&models.Passenger{},
-		&models.Payment{},
-		&models.Role{},
-		&models.Ticket{},
-		&models.User{},
-	)
-	if err != nil {
-		return err
 	}
 
 	sqlDB, err := db.DB()
