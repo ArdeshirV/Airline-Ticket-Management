@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -59,18 +60,17 @@ func (u *UserHandler) Authorize(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (u *UserHandler) GetUserFromSession(c echo.Context) (*domain.User, error) {
 	session := c.Get("session").(*sessions.Session)
-
-	var key interface{}
-	key = "userID"
+	key := "userID"
 	if userID, ok := session.Values[key]; ok {
-		user, err := u.userUsecase.GetUserById(uint(userID.(int)))
+		user, err := u.userUsecase.GetUserById(userID.(uint))
 		if err != nil {
 			return nil, err
 		}
+		println("inside 4")
 		return user, nil
 	}
 
-	return nil, nil
+	return nil, errors.New("No user found")
 }
 
 func isAuthorized(user *domain.User, role string) bool {
