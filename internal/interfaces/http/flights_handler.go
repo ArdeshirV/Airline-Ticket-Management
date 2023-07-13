@@ -1,277 +1,299 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/the-go-dragons/final-project/internal/domain"
-)
-
-type Flights []domain.Flight
-type SortOption int
-
-const (
-	SortByPrice SortOption = iota
-	SortByDepartureDatetime
-	SortByArrivalDatetime
-	SortByDurationDatetime
+	model "github.com/the-go-dragons/final-project/internal/domain"
+	"github.com/the-go-dragons/final-project/pkg/mock_api"
 )
 
 const (
-	testCode = false
+	BadRequest = "bad request"
+	TimeLayout = "2006-01-02_15:04:05"
 
-	// sort types
-	AscendingSort  = "asc"
-	DescendingSort = "desc"
+	ParamFlightNo = "flightno"
 
-	// params constant
-	ParamMinimumCapacity   = "min_capacity"
-	ParamDepartureDateTime = "depature_datetime"
-	ParamArriveDateTime    = "arrive_datetime"
-	ParamAirplane          = "airplane"
-	ParamAirline           = "airline"
+	ParamTime  = "time"
+	ParamCityA = "city_a"
+	ParamCityB = "city_b"
 
-	// sort params
-	ParamSortPrice            = "sort_price"
-	ParamSortDuration         = "sort_duration"
-	ParamSortArriveDatetime   = "sort_arrive_datetime"
-	ParamSortDepatureDatetime = "sort_depature_datetime"
+	ParamAscending           = "asc"
+	ParamDescending          = "desc"
+	ParamSortByPrice         = "sort_by_price"
+	ParamSortByDuration      = "sort_by_duration"
+	ParamSortByDepartureTime = "sort_by_departure_time"
+
+	ParamDepartureTime           = "departure_time"
+	ParamAirlineName             = "airline_name"
+	ParamAircraftType            = "aircraft_type"
+	ParamRemainingCapacity       = "remaining_capacity"
+	ParamRemainingCapacityExists = "remaining_capacity_exists"
 )
 
-func FlightsRoute(e *echo.Echo) {
+func DataRoute(e *echo.Echo) {
 	e.GET("/flights", flightsHandler)
 }
 
+// Test this end-point with these commands:
+// http://localhost:8080/flights
+// http://localhost:8080/flights?flightno=VN931
+// http://localhost:8080/flights?departure_time=2023-10-14_15:30:00
+// http://localhost:8080/flights?airline_name=Air%20France
+// http://localhost:8080/flights?aircraft_type=Happy%20Airplane
+// http://localhost:8080/flights?remaining_capacity=0
+// http://localhost:8080/flights?remaining_capacity_exists
+// http://localhost:8080/flights?sort_by_price=asc
+// http://localhost:8080/flights?sort_by_price=desc
+// http://localhost:8080/flights?sort_by_duration=asc
+// http://localhost:8080/flights?sort_by_duration=desc
+// http://localhost:8080/flights?sort_by_departure_time=asc
+// http://localhost:8080/flights?sort_by_departure_time=desc
+// http://localhost:8080/flights?sort_by_price=asc&sort_by_departure_time=desc
+// http://localhost:8080/data?city_a=New%20York&city_b=Paris&time=2023-06-14
+// http://localhost:8080/flights?aircraft_type=Happy%20Airplane&sort_by_departure_time=asc
 func flightsHandler(ctx echo.Context) error {
-	data := make(Flights, 0)
-
-	minCapacity := ctx.QueryParam(ParamMinimumCapacity)
-	depatureDatetime := ctx.QueryParam(ParamDepartureDateTime)
-	arriveDatetime := ctx.QueryParam(ParamArriveDateTime)
-	airplane := ctx.QueryParam(ParamAirplane)
-	airline := ctx.QueryParam(ParamAirline)
-	priceSort := ctx.QueryParam(ParamSortPrice)
-	durationSort := ctx.QueryParam(ParamSortDuration)
-	arriveDatetimeSort := ctx.QueryParam(ParamSortArriveDatetime)
-	depatureDatetimeSort := ctx.QueryParam(ParamSortDepatureDatetime)
-
-	if minCapacity != "" {
-
-		numberMinCapacity, err := strconv.Atoi(minCapacity)
-
+	flightNo := ctx.QueryParam(ParamFlightNo)
+	if flightNo != "" {
+		filteredFlight, err := mock_api.GetFlightsByFlightNo(flightNo)
 		if err != nil {
 			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
-
-		data, err = data.FilterFlightsByMinimumCapacity(numberMinCapacity)
-
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
+		return echoJSON(ctx, http.StatusOK, filteredFlight)
 	}
 
-	if airplane != "" {
-
-		airplaneId, err := strconv.Atoi(airplane)
-
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
-
-		data, err = data.FilterFlightsByAirplaneId(airplaneId)
-
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
-	}
-
-	if airline != "" {
-
-		airlineId, err := strconv.Atoi(airline)
-
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
-
-		data, err = data.FilterFlightsByAirlineId(airlineId)
-
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
-	}
-
-	if depatureDatetime != "" || arriveDatetime != "" {
-		result, err := data.FilterFlightsByDepatureTimeAndArriveTime(depatureDatetime, arriveDatetime)
-
-		if err != nil {
-			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
-		}
-
-		data = result
-	}
-
-	if testCode {
-		fmt.Printf("ParamSortPrice: %v\n", ParamSortPrice)
-	}
-
-	data = data.ApplySort(ParamSortPrice, priceSort).ApplySort(ParamSortDuration, durationSort).ApplySort(ParamSortArriveDatetime, arriveDatetimeSort).ApplySort(ParamSortDepatureDatetime, depatureDatetimeSort)
-
-	return echoJSON(ctx, http.StatusOK, data)
-}
-
-func (flights Flights) FilterFlightsByMinimumCapacity(minimumCapacity int) (Flights, error) {
-
-	filteredFlights := make(Flights, 0)
-
-	for _, flight := range flights {
-		if flight.RemainingCapacity >= minimumCapacity {
-			filteredFlights = append(filteredFlights, flight)
-		}
-	}
-
-	return filteredFlights, nil
-}
-
-func (flights Flights) FilterFlightsByDepatureTimeAndArriveTime(depatureDatetime string, arriveDateTime string) (Flights, error) {
-	filteredFlights := make(Flights, 0)
-
-	var parsedDepatureDatetime time.Time
-	var parsedArriveDatetime time.Time
 	var err error
+	var filteredFlights []model.Flight
+	cityA := ctx.QueryParam(ParamCityA)
+	cityB := ctx.QueryParam(ParamCityB)
+	timeD := ctx.QueryParam(ParamTime)
+	if timeD != "" || cityA != "" || cityB != "" {
+		errMsg := ""
+		dataIsNotEnough := false
 
-	if depatureDatetime != "" {
-		parsedDepatureDatetime, err = time.Parse("2006-01-02T15:04:05Z", depatureDatetime)
+		if timeD == "" {
+			dataIsNotEnough = true
+			errMsg += "'time' is not defined correctly. "
+		}
+		if cityA == "" {
+			dataIsNotEnough = true
+			errMsg += "'city_a' is not defined correctly. "
+		}
+		if cityB == "" {
+			dataIsNotEnough = true
+			errMsg += "'city_b' is not defined correctly. "
+		}
+		if dataIsNotEnough {
+			return echoStringAsJSON(ctx, http.StatusBadRequest, errMsg)
+		} else {
+			filteredFlights, err = mock_api.GetFlightsFromA2B(timeD, cityA, cityB)
+			if err != nil {
+				return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
+			}
+		}
+	} else {
+		filteredFlights, err = mock_api.GetFlights()
 		if err != nil {
-			return nil, err
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
 		}
 	}
 
-	if arriveDateTime != "" {
-		parsedArriveDatetime, err = time.Parse("2006-01-02T15:04:05Z", arriveDateTime)
+	departureTime := ctx.QueryParam(ParamDepartureTime)
+	if departureTime != "" {
+		dateTime, err := time.Parse(TimeLayout, departureTime)
 		if err != nil {
-			return nil, err
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
+		}
+		filteredFlights = filterFlightsByDepartureTime(filteredFlights, dateTime)
+	}
+
+	airlineName := ctx.QueryParam(ParamAirlineName)
+	if airlineName != "" {
+		filteredFlights = filterFlightsByAirlineName(filteredFlights, airlineName)
+	}
+
+	aircraftType := ctx.QueryParam(ParamAircraftType)
+	if aircraftType != "" {
+		filteredFlights = filterFlightsByAircraftType(filteredFlights, aircraftType)
+	}
+
+	remainingCapacity := ctx.QueryParam(ParamRemainingCapacity)
+	if remainingCapacity != "" {
+		remainingCapacityNum, err := strconv.Atoi(remainingCapacity)
+		if err != nil {
+			return echoErrorAsJSON(ctx, http.StatusBadRequest, err)
+		}
+		filteredFlights = filterFlightsByRemainingCapacity(filteredFlights, remainingCapacityNum)
+	}
+
+	remainingCapacityExists := ctx.QueryParam(ParamRemainingCapacityExists)
+	if remainingCapacityExists != "" {
+		input := strings.ToLower(strings.TrimSpace(remainingCapacityExists))
+		if input == "true" {
+			filteredFlights = filterFlightsByRemainingCapacityExists(filteredFlights, true)
+		} else if input == "false" {
+			filteredFlights = filterFlightsByRemainingCapacityExists(filteredFlights, false)
+		} else {
+			return echoStringAsJSON(ctx, http.StatusBadRequest, BadRequest)
 		}
 	}
 
+	sortByPrice := ctx.QueryParam(ParamSortByPrice)
+	if sortByPrice != "" {
+		if sortByPrice == ParamAscending {
+			filteredFlights = sortFlightsByPrice(filteredFlights, true)
+		} else if sortByPrice == ParamDescending {
+			filteredFlights = sortFlightsByPrice(filteredFlights, false)
+		} else {
+			return echoStringAsJSON(ctx, http.StatusBadRequest, BadRequest)
+		}
+	}
+
+	sortByDuration := ctx.QueryParam(ParamSortByDuration)
+	if sortByDuration != "" {
+		if sortByDuration == ParamAscending {
+			filteredFlights = sortFlightsByDuration(filteredFlights, true)
+		} else if sortByDuration == ParamDescending {
+			filteredFlights = sortFlightsByDuration(filteredFlights, false)
+		} else {
+			return echoStringAsJSON(ctx, http.StatusBadRequest, BadRequest)
+		}
+	}
+
+	sortByDepartureTime := ctx.QueryParam(ParamSortByDepartureTime)
+	if sortByDepartureTime != "" {
+		if sortByDepartureTime == ParamAscending {
+			filteredFlights = sortFlightsByDepartureTime(filteredFlights, true)
+		} else if sortByDepartureTime == ParamDescending {
+			filteredFlights = sortFlightsByDepartureTime(filteredFlights, false)
+		} else {
+			return echoStringAsJSON(ctx, http.StatusBadRequest, BadRequest)
+		}
+	}
+
+	return echoJSON(ctx, http.StatusOK, filteredFlights)
+}
+
+func filterFlightsByRemainingCapacityExists(flights []model.Flight, cond bool) []model.Flight {
+	var filteredFlights []model.Flight
 	for _, flight := range flights {
-		if (depatureDatetime == "" || flight.DepartureTime == parsedDepatureDatetime) &&
-			(arriveDateTime == "" || flight.ArrivalTime == parsedArriveDatetime) {
+		if cond {
+			if flight.RemainingCapacity != 0 {
+				filteredFlights = append(filteredFlights, flight)
+			}
+		} else {
+			if flight.RemainingCapacity == 0 {
+				filteredFlights = append(filteredFlights, flight)
+			}
+		}
+	}
+	return filteredFlights
+}
+
+func filterFlightsByDepartureTime(flights []model.Flight, t time.Time) []model.Flight {
+	var filteredFlights []model.Flight
+	for _, flight := range flights {
+		if flight.DepartureTime.Equal(t) {
 			filteredFlights = append(filteredFlights, flight)
 		}
 	}
-
-	return filteredFlights, nil
+	return filteredFlights
 }
 
-func (flights Flights) FilterFlightsByAirplaneId(airplaneId int) (Flights, error) {
-
-	filteredFlights := make(Flights, 0)
-
+func filterFlightsByAirlineName(flights []model.Flight, airlineName string) []model.Flight {
+	var filteredFlights []model.Flight
 	for _, flight := range flights {
-		if testCode {
-			fmt.Printf("flight.AirplaneID: %v\n", flight.AirplaneID)
-		}
-		if int(flight.AirplaneID) == airplaneId {
+		// TODO: Check if Airplane and Airline are nil or not
+		// It is not necessary when we work with mock-API
+		if flight.Airplane.Airline.Name == airlineName {
 			filteredFlights = append(filteredFlights, flight)
 		}
 	}
-
-	return filteredFlights, nil
+	return filteredFlights
 }
 
-func (flights Flights) FilterFlightsByAirlineId(airlineId int) (Flights, error) {
-
-	filteredFlights := make(Flights, 0)
-
+func filterFlightsByAircraftType(flights []model.Flight, aircraftType string) []model.Flight {
+	var filteredFlights []model.Flight
 	for _, flight := range flights {
-		if int(flight.Airplane.AirlineID) == airlineId {
+		if flight.Airplane.Name == aircraftType {
 			filteredFlights = append(filteredFlights, flight)
 		}
 	}
-
-	return filteredFlights, nil
+	return filteredFlights
 }
 
-func (flights Flights) SortBy(sortOption SortOption, ascending bool) Flights {
-	switch sortOption {
-	case SortByPrice:
-		{
-			sort.Slice(flights, func(i, j int) bool {
-				if ascending {
-					return flights[i].Price < flights[j].Price
-				} else {
-					return flights[i].Price > flights[j].Price
-				}
-			})
-			break
-		}
-	case SortByDepartureDatetime:
-		{
-			sort.Slice(flights, func(i, j int) bool {
-				if ascending {
-					return flights[i].DepartureTime.Before(flights[j].DepartureTime)
-				} else {
-					return flights[i].DepartureTime.After(flights[j].DepartureTime)
-				}
-			})
-			break
-		}
-	case SortByArrivalDatetime:
-		{
-			sort.Slice(flights, func(i, j int) bool {
-				if ascending {
-					return flights[i].ArrivalTime.Before(flights[j].ArrivalTime)
-				} else {
-					return flights[i].ArrivalTime.After(flights[j].ArrivalTime)
-				}
-			})
-			break
-		}
-	case SortByDurationDatetime:
-		{
-			sort.Slice(flights, func(i, j int) bool {
-				durationI := flights[i].ArrivalTime.Sub(flights[i].DepartureTime)
-				durationJ := flights[j].ArrivalTime.Sub(flights[j].DepartureTime)
-				if ascending {
-					return durationI < durationJ
-				} else {
-					return durationI > durationJ
-				}
-			})
-			break
+func filterFlightsByRemainingCapacity(flights []model.Flight, remainingCapacity int) []model.Flight {
+	var filteredFlights []model.Flight
+	for _, flight := range flights {
+		if flight.RemainingCapacity == remainingCapacity {
+			filteredFlights = append(filteredFlights, flight)
 		}
 	}
+	return filteredFlights
+}
 
+func sortFlightsByDuration(flights []model.Flight, asc bool) []model.Flight {
+	if asc {
+		for i := 0; i < len(flights)-1; i++ {
+			for j := i + 1; j < len(flights); j++ {
+				if flights[i].ArrivalTime.Sub(flights[i].DepartureTime) > flights[j].ArrivalTime.Sub(flights[j].DepartureTime) {
+					flights[i], flights[j] = flights[j], flights[i]
+				}
+			}
+		}
+	} else {
+		for i := 0; i < len(flights)-1; i++ {
+			for j := i + 1; j < len(flights); j++ {
+				if flights[i].ArrivalTime.Sub(flights[i].DepartureTime) < flights[j].ArrivalTime.Sub(flights[j].DepartureTime) {
+					flights[i], flights[j] = flights[j], flights[i]
+				}
+			}
+		}
+	}
 	return flights
 }
 
-func (flights Flights) ApplySort(sortName string, sortValue string) Flights {
-	var newFlights Flights = flights
-	isSortAscending := sortValue == "asc"
-
-	if testCode {
-		fmt.Printf("sortName: %v %v\n", sortName, sortValue != "")
+func sortFlightsByPrice(flights []model.Flight, asc bool) []model.Flight {
+	if asc {
+		for i := 0; i < len(flights)-1; i++ {
+			for j := i + 1; j < len(flights); j++ {
+				if flights[i].Price > flights[j].Price {
+					flights[i], flights[j] = flights[j], flights[i]
+				}
+			}
+		}
+	} else {
+		for i := 0; i < len(flights)-1; i++ {
+			for j := i + 1; j < len(flights); j++ {
+				if flights[i].Price < flights[j].Price {
+					flights[i], flights[j] = flights[j], flights[i]
+				}
+			}
+		}
 	}
+	return flights
+}
 
-	if sortName == ParamSortPrice && sortValue != "" {
-		newFlights = flights.SortBy(SortByPrice, isSortAscending)
+func sortFlightsByDepartureTime(flights []model.Flight, asc bool) []model.Flight {
+	if asc {
+		for i := 0; i < len(flights)-1; i++ {
+			for j := i + 1; j < len(flights); j++ {
+				if flights[i].DepartureTime.After(flights[j].DepartureTime) {
+					flights[i], flights[j] = flights[j], flights[i]
+				}
+			}
+		}
+	} else {
+		for i := 0; i < len(flights)-1; i++ {
+			for j := i + 1; j < len(flights); j++ {
+				if flights[i].DepartureTime.Before(flights[j].DepartureTime) {
+					flights[i], flights[j] = flights[j], flights[i]
+				}
+			}
+		}
 	}
-
-	if sortName == ParamSortDuration && sortValue != "" {
-		newFlights = flights.SortBy(SortByDurationDatetime, isSortAscending)
-	}
-
-	if sortName == ParamSortArriveDatetime && sortValue != "" {
-		newFlights = flights.SortBy(SortByArrivalDatetime, isSortAscending)
-	}
-
-	if sortName == ParamSortDepatureDatetime && sortValue != "" {
-		newFlights = flights.SortBy(SortByDepartureDatetime, isSortAscending)
-	}
-
-	return newFlights
+	return flights
 }
