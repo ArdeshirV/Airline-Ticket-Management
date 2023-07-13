@@ -21,7 +21,8 @@ func PrintTicketRoute(e *echo.Echo) {
 func PrintTicketHandler(ctx echo.Context) error {
 	ticketid := ctx.QueryParam(ParamTicketID)
 	if ticketid == "" {
-		return echoStringAsJSON(ctx, http.StatusBadRequest, "the 'Ticketid' parameter is required")
+		errMsg := "the 'Ticketid' parameter is required"
+		return echoStringAsJSON(ctx, http.StatusBadRequest, errMsg)
 	}
 	id, err := strconv.Atoi(ticketid)
 	if err != nil {
