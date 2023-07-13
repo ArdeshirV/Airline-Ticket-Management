@@ -5,43 +5,77 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/interfaces/persistence"
 )
 
-func PassengerRoute(e *echo.Echo) {
-	e.POST("/passengers", AddPassenger)
-	e.GET("/passengers", GetPassengers)
-	e.PUT("/passengers/:id", UpdatePassenger)
-	e.DELETE("/passengers/:id", DeletePassenger)
+func PassengerRoute(passengerHandler passengerHandler, e *echo.Echo) {
+	e.POST("/passengers", passengerHandler.AddPassenger)
+	e.GET("/passengers", passengerHandler.GetPassengers)
+	e.PUT("/passengers/:id", passengerHandler.UpdatePassenger)
+	e.DELETE("/passengers/:id", passengerHandler.DeletePassenger)
 }
 
-func AddPassenger(c echo.Context) error {
+type passengerHandler struct {
+	passengerRepo persistence.PassengerRepository
+	userhandler   UserHandler
+}
+
+func NewPassegerHandler(passengerRepo persistence.PassengerRepository,
+	userhandler UserHandler) passengerHandler {
+	return passengerHandler{
+		passengerRepo: passengerRepo,
+		userhandler:   userhandler,
+	}
+}
+func (p passengerHandler) AddPassenger(c echo.Context) error {
+	user, err := p.userhandler.GetUserFromSession(c)
+	println(":::::::::::::::::1")
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
+	}
+	println(user)
+	println("UID:", user.ID)
 	var passenger domain.Passenger
-	err := c.Bind(&passenger)
+	err = c.Bind(&passenger)
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
-	pr := persistence.NewPassengerRepository()
+	println(":::::::::::::::::2")
+	passenger.UserID = user.ID
+	pr := p.passengerRepo
 	if _, err := pr.Create(&passenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
+
+	println(":::::::::::::::::3")
 	msg := fmt.Sprintf("passenger with ID:%d added", passenger.ID)
 	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 
-func DeletePassenger(c echo.Context) error {
+func (p passengerHandler) DeletePassenger(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
 		return echoStringAsJSON(c, http.StatusBadRequest, "the parameter 'id' is required")
 	}
+	user, err := p.userhandler.GetUserFromSession(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
+	}
+	println("UID:", user.ID)
 	passengerID, err := strconv.Atoi(id)
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
-	pr := persistence.NewPassengerRepository()
+	pr := p.passengerRepo
+	passenger, err := pr.Get(passengerID)
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+	if passenger.UserID != user.ID {
+		return c.NoContent(http.StatusUnauthorized)
+	}
 	if err = pr.Delete(passengerID); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
@@ -49,11 +83,16 @@ func DeletePassenger(c echo.Context) error {
 	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 
-func UpdatePassenger(c echo.Context) error {
+func (p passengerHandler) UpdatePassenger(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {
 		return echoStringAsJSON(c, http.StatusBadRequest, "the parameter 'id' is required")
 	}
+	user, err := p.userhandler.GetUserFromSession(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
+	}
+	println("UID:", user.ID)
 	passengerID, err := strconv.Atoi(id)
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
@@ -63,7 +102,15 @@ func UpdatePassenger(c echo.Context) error {
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
-	pr := persistence.NewPassengerRepository()
+	println("UID:", user.ID)
+	pr := p.passengerRepo
+	passenger, err := pr.Get(passengerID)
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+	if passenger.UserID != user.ID {
+		return c.NoContent(http.StatusUnauthorized)
+	}
 	if _, err := pr.Update(&updatedPassenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
@@ -71,15 +118,13 @@ func UpdatePassenger(c echo.Context) error {
 	return echoStringAsJSON(c, http.StatusOK, msg)
 }
 
-func GetPassengers(c echo.Context) error {
-	value, ok := c.Get("session").(*sessions.Session).Values["userID"]
-	if !ok {
+func (p passengerHandler) GetPassengers(c echo.Context) error {
+	user, err := p.userhandler.GetUserFromSession(c)
+	if err != nil {
 		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
-	userId := int(value.(uint))
-	println("UID:", userId)
-	pr := persistence.NewPassengerRepository()
-	response, err := pr.GetByUserId(userId)
+	pr := p.passengerRepo
+	response, err := pr.GetByUserId(int(user.ID))
 	if err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
