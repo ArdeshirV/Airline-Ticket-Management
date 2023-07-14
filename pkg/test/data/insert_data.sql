@@ -51,7 +51,7 @@ insert into flights (id,flight_no,departure_id,destination_id,
 	values
 	(301,'CPN6909',501,502,NOW()::date + interval '4 hours',NOW()::date + interval '6 hours',2001,'Economic Class',12000000,130,NOW(),NOW()),
 	(302,'IZG4076',502,506,NOW()::date + interval '48 hours',NOW()::date + interval '52 hours',2005,'Business Class',14000000,102,NOW(),NOW()),
-	(303,'TBZ5662',505,503,NOW()::date - interval '5 hours',NOW()::date + interval '1 hours',2004,'First Class',17000000,180,NOW(),NOW()),
+	(303,'TBZ5662',505,503,NOW()::date + interval '5 hours',NOW()::date + interval '1 hours',2004,'First Class',17000000,180,NOW(),NOW()),
 	(304,'IRA320',501,504,NOW()::date + interval '14 hours',NOW()::date + interval '15 hours',2002,'Economic Class',9000000,550,NOW(),NOW()),
 	(305,'IRC645',504,506,NOW()::date + interval '10 hours',NOW()::date + interval '14 hours'+ interval '20 minute',2003,'Business Class',10000000,130,NOW(),NOW()),
 	(306,'QSM1290',506,505,NOW()::date + interval '2 hours'+ interval '30 minute',NOW()::date + interval '6 hours',2006,'Economic Class',16000000,117,NOW(),NOW());
@@ -62,7 +62,7 @@ insert into roles  (id,name,description,created_at,updated_at)
 ------------------------------------------
 insert into users  (id,username,password,email,phone,role_id,created_at)
    values
-   (10,'RezaAhmadi','$2a$10$E1iADe9slYWiRtSu24h3uyNG1L/CSrjN9N7D6abGo9QxjFoinEjC','Reza.Ahmadi@godragon.com','09111111111',3,NOW());
+   (10,'RezaAhmadi','$2a$10$NiwI76RlpFmjMqwLmWlq5enLghawQdvcOxi49DzU2dTDnOOV3QJZe','Reza.Ahmadi@godragon.com','09111111111',3,NOW());
  ------------------------------------------------------------------
 insert into passengers  (id,first_name,last_name,national_code,gender,birth_date,user_id,created_at,updated_at)
 	values
