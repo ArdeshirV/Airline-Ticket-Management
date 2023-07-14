@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/the-go-dragons/final-project/internal/domain"
 	"github.com/the-go-dragons/final-project/internal/usecase"
 )
 
@@ -14,27 +13,36 @@ type TicketActionRequest struct {
 	TicketId int
 }
 
-type tickets *[]domain.Ticket
+// type tickets *[]domain.Ticket
 
 type TicketHandler struct {
 	ticketUseCase *usecase.TicketUsecase
 	flightUseCase *usecase.FlightUseCase
 	booking       *usecase.Booking
+	userHandler   UserHandler
 }
 
-func NewTicketHandler(ticketUseCase *usecase.TicketUsecase, flightUseCase *usecase.FlightUseCase, booking *usecase.Booking) *TicketHandler {
+func NewTicketHandler(ticketUseCase *usecase.TicketUsecase,
+	flightUseCase *usecase.FlightUseCase,
+	booking *usecase.Booking, userHandler UserHandler) *TicketHandler {
 	return &TicketHandler{
 		ticketUseCase: ticketUseCase,
 		flightUseCase: flightUseCase,
 		booking:       booking,
+		userHandler:   userHandler,
 	}
 }
 
 func (th *TicketHandler) Cancel(c echo.Context) error {
+	user, err := th.userHandler.GetUserFromSession(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
+	}
+	println("UID:", user.ID)
 	var request TicketActionRequest
 
 	// Check the body data
-	err := c.Bind(&request)
+	err = c.Bind(&request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "Invalid body request"})
 
@@ -55,15 +63,19 @@ func (th *TicketHandler) Cancel(c echo.Context) error {
 }
 
 func (th *TicketHandler) GetReservedUsers(c echo.Context) error {
-
-	// Check the body data
-	user := c.Get("user").(domain.User)
-	if user.ID == 0 || user.Username == "" {
-		return c.JSON(http.StatusBadRequest, MassageResponse{Message: "login first"})
+	user, err := th.userHandler.GetUserFromSession(c)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, Response{Message: "Login first"})
 	}
-  
+	println("UID:", user.ID)
+	// Check the body data
+	// user := c.Get("user").(domain.User)
+	// if user.ID == 0 || user.Username == "" {
+	// 	return c.JSON(http.StatusBadRequest, MassageResponse{Message: "login first"})
+	// }
+
 	tickets, err := th.booking.GetReservedTickets(uint(user.ID))
-	if err == nil {
+	if err != nil {
 		return c.JSON(http.StatusConflict, MassageResponse{Message: "can not read the ticket data"})
 	}
 
