@@ -111,6 +111,7 @@ func (p passengerHandler) UpdatePassenger(c echo.Context) error {
 	if passenger.UserID != user.ID {
 		return c.NoContent(http.StatusUnauthorized)
 	}
+	updatedPassenger.UserID = user.ID
 	if _, err := pr.Update(&updatedPassenger); err != nil {
 		return echoErrorAsJSON(c, http.StatusBadRequest, err)
 	}
